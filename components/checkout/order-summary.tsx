@@ -1,0 +1,74 @@
+"use client"
+
+import Image from "next/image"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { useCart } from "@/lib/cart-context"
+
+export default function OrderSummary() {
+  const { items, subtotal } = useCart()
+
+  const shipping = 4.99
+  const tax = subtotal * 0.08
+  const total = subtotal + shipping + tax
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Order Summary</CardTitle>
+        <CardDescription>Review your order details</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {items.map((item) => (
+          <div key={item.id} className="flex gap-4">
+            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border">
+              <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium">{item.name}</h4>
+              <p className="text-sm text-muted-foreground">{item.options}</p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-sm">
+                  ${(item.salePrice || item.price).toFixed(2)} × {item.quantity}
+                </p>
+                <p className="font-medium">${((item.salePrice || item.price) * item.quantity).toFixed(2)}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <Separator className="my-4" />
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Subtotal</span>
+            <span>${subtotal.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Shipping</span>
+            <span>${shipping.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Tax</span>
+            <span>${tax.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="flex items-center justify-between font-medium">
+          <span>Total</span>
+          <span>${total.toFixed(2)}</span>
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-2">
+        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Place Order</Button>
+        <Link href="/products" className="text-sm text-center text-muted-foreground hover:text-foreground">
+          Continue Shopping
+        </Link>
+      </CardFooter>
+    </Card>
+  )
+}
