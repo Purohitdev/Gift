@@ -77,7 +77,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         description: `${product.name} has been removed from your wishlist.`,
       })
     } else {
-      addToWishlist(product)
+      addToWishlist({ ...product, salePrice: product.salePrice ?? null, badge: product.badge ?? null })
       toast({
         title: "Added to wishlist",
         description: `${product.name} has been added to your wishlist.`,

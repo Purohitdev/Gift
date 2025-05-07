@@ -7,6 +7,14 @@ import Footer from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/lib/cart-context"
 import { WishlistProvider } from "@/lib/wishlist-context"
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +31,6 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Gifty - Personalized Gift Shop",
   description: "Find the perfect personalized gift for your loved ones",
-    generator: 'dev'
 }
 
 export default function RootLayout({
@@ -32,18 +39,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="min-h-screen bg-white font-sans">
-        <ThemeProvider attribute="class" defaultTheme="light">
-          <CartProvider>
-            <WishlistProvider>
-              <Header />
-              {children}
-              <Footer />
-            </WishlistProvider>
-          </CartProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+        <body className="min-h-screen bg-white font-sans">
+          <ThemeProvider attribute="class" defaultTheme="light">
+            <CartProvider>
+              <WishlistProvider>
+                <Header />
+                {children}
+                <Footer />
+              </WishlistProvider>
+            </CartProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
