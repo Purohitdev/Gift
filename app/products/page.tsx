@@ -10,7 +10,6 @@ import { Slider } from "@/components/ui/slider"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { products, categories } from "@/lib/data"
 import ProductCard from "@/components/product/product-card"
 
 export default function ProductsPage() {
@@ -25,15 +24,25 @@ export default function ProductsPage() {
   const maxPriceParam = searchParams.get("maxPrice")
   const ratingParam = searchParams.get("rating")
   const sortParam = searchParams.get("sort") || "featured"
+  const pageParam = parseInt(searchParams.get("page") || "1")
 
-  // Calculate max price for slider
-  const maxPrice = Math.max(...products.map((p) => p.price))
+  // State for data
+  const [products, setProducts] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [pagination, setPagination] = useState({
+    currentPage: pageParam,
+    totalPages: 1,
+    totalProducts: 0,
+    hasMore: false
+  })
 
-  // State for filters
+  // State for UI
+  const [maxPrice, setMaxPrice] = useState<number>(1000)
   const [selectedCategories, setSelectedCategories] = useState<string[]>(categoryParam ? [categoryParam] : [])
   const [priceRange, setPriceRange] = useState<[number, number]>([
     minPriceParam ? Number.parseInt(minPriceParam) : 0,
-    maxPriceParam ? Number.parseInt(maxPriceParam) : maxPrice,
+    maxPriceParam ? Number.parseInt(maxPriceParam) : 1000,
   ])
   const [showSaleOnly, setShowSaleOnly] = useState<boolean>(saleParam)
   const [minRating, setMinRating] = useState<number>(ratingParam ? Number.parseInt(ratingParam) : 0)
@@ -41,141 +50,186 @@ export default function ProductsPage() {
   const [activeFilters, setActiveFilters] = useState<number>(0)
   const [viewMode, setViewMode] = useState<string>("grid")
 
-  // Update URL with filters
+  // Fetch products and categories on mount
   useEffect(() => {
-    const params = new URLSearchParams()
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
 
-    if (selectedCategories.length > 0) {
-      params.set("category", selectedCategories.join(","))
-    }
+    fetchCategories();
+  }, []);
 
-    if (showSaleOnly) {
-      params.set("sale", "true")
-    }
-
-    if (priceRange[0] > 0) {
-      params.set("minPrice", priceRange[0].toString())
-    }
-
-    if (priceRange[1] < maxPrice) {
-      params.set("maxPrice", priceRange[1].toString())
-    }
-
-    if (minRating > 0) {
-      params.set("rating", minRating.toString())
-    }
-
-    if (sortBy !== "featured") {
-      params.set("sort", sortBy)
-    }
-
-    if (searchQuery) {
-      params.set("search", searchQuery)
-    }
-
+  // Fetch products when filters change
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      
+      try {
+        // Build query params for API request
+        const params = new URLSearchParams();
+        
+        if (selectedCategories.length > 0) {
+          params.set('category', selectedCategories.join(','));
+        }
+        
+        if (showSaleOnly) {
+          params.set('sale', 'true');
+        }
+        
+        if (priceRange[0] > 0) {
+          params.set('minPrice', priceRange[0].toString());
+        }
+        
+        if (priceRange[1] < maxPrice) {
+          params.set('maxPrice', priceRange[1].toString());
+        }
+        
+        if (minRating > 0) {
+          params.set('rating', minRating.toString());
+        }
+        
+        if (sortBy) {
+          params.set('sort', sortBy);
+        }
+        
+        if (searchQuery) {
+          params.set('search', searchQuery);
+        }
+        
+        // Add pagination
+        params.set('page', pagination.currentPage.toString());
+        
+        const response = await fetch(`/api/products?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        
+        const data = await response.json();
+        setProducts(data.products);
+        setPagination(data.pagination);
+        
+        // If this is the first load, set the max price based on the most expensive product
+        if (products.length === 0) {
+          const maxProductPrice = Math.max(...data.products.map((p: any) => p.price), 0);
+          setMaxPrice(maxProductPrice > 0 ? maxProductPrice : 1000);
+          if (!maxPriceParam) {
+            setPriceRange([priceRange[0], maxProductPrice]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
+    
     // Count active filters
-    let filterCount = 0
-    if (selectedCategories.length > 0) filterCount++
-    if (showSaleOnly) filterCount++
-    if (priceRange[0] > 0 || priceRange[1] < maxPrice) filterCount++
-    if (minRating > 0) filterCount++
-    setActiveFilters(filterCount)
-
+    let filterCount = 0;
+    if (selectedCategories.length > 0) filterCount++;
+    if (showSaleOnly) filterCount++;
+    if (priceRange[0] > 0 || priceRange[1] < maxPrice) filterCount++;
+    if (minRating > 0) filterCount++;
+    setActiveFilters(filterCount);
+    
     // Update URL without refreshing the page
-    const url = `/products?${params.toString()}`
-    router.push(url, { scroll: false })
-  }, [selectedCategories, showSaleOnly, priceRange, minRating, sortBy, router, maxPrice, searchQuery])
-
-  // Filter products
-  const filteredProducts = products.filter((product) => {
-    // Search filter
-    if (
-      searchQuery &&
-      !product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !product.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !product.category.toLowerCase().includes(searchQuery.toLowerCase())
-    ) {
-      return false
+    const params = new URLSearchParams();
+    
+    if (selectedCategories.length > 0) {
+      params.set('category', selectedCategories.join(','));
     }
-
-    // Category filter
-    if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
-      return false
+    
+    if (showSaleOnly) {
+      params.set('sale', 'true');
     }
-
-    // Price filter
-    const price = product.salePrice || product.price
-    if (price < priceRange[0] || price > priceRange[1]) {
-      return false
+    
+    if (priceRange[0] > 0) {
+      params.set('minPrice', priceRange[0].toString());
     }
-
-    // Sale filter
-    if (showSaleOnly && !product.salePrice) {
-      return false
+    
+    if (priceRange[1] < maxPrice) {
+      params.set('maxPrice', priceRange[1].toString());
     }
-
-    // Rating filter
-    if (minRating > 0 && product.rating < minRating) {
-      return false
+    
+    if (minRating > 0) {
+      params.set('rating', minRating.toString());
     }
-
-    return true
-  })
-
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case "price-low":
-        return (a.salePrice || a.price) - (b.salePrice || b.price)
-      case "price-high":
-        return (b.salePrice || b.price) - (a.salePrice || a.price)
-      case "rating":
-        return b.rating - a.rating
-      case "newest":
-        return b.id - a.id
-      default:
-        // Featured - sort by a combination of rating and review count
-        return b.rating * b.reviewCount - a.rating * a.reviewCount
+    
+    if (sortBy !== 'featured') {
+      params.set('sort', sortBy);
     }
-  })
+    
+    if (searchQuery) {
+      params.set('search', searchQuery);
+    }
+    
+    if (pagination.currentPage > 1) {
+      params.set('page', pagination.currentPage.toString());
+    }
+    
+    const url = `/products?${params.toString()}`;
+    router.push(url, { scroll: false });
+  }, [selectedCategories, showSaleOnly, priceRange, minRating, sortBy, pagination.currentPage, searchQuery]);
 
   // Reset filters
   const resetFilters = () => {
-    setSelectedCategories([])
-    setPriceRange([0, maxPrice])
-    setShowSaleOnly(false)
-    setMinRating(0)
+    setSelectedCategories([]);
+    setPriceRange([0, maxPrice]);
+    setShowSaleOnly(false);
+    setMinRating(0);
+    setPagination({ ...pagination, currentPage: 1 });
 
     // Remove filter params from URL
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete("category")
-    params.delete("sale")
-    params.delete("minPrice")
-    params.delete("maxPrice")
-    params.delete("rating")
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("category");
+    params.delete("sale");
+    params.delete("minPrice");
+    params.delete("maxPrice");
+    params.delete("rating");
+    params.delete("page");
 
     // Keep search and sort params
-    const url = `/products?${params.toString()}`
-    router.push(url, { scroll: false })
-  }
+    const url = `/products?${params.toString()}`;
+    router.push(url, { scroll: false });
+  };
 
   // Remove a specific filter
   const removeFilter = (type: string, value?: string) => {
     switch (type) {
       case "category":
-        setSelectedCategories((prev) => prev.filter((cat) => cat !== value))
-        break
+        setSelectedCategories((prev) => prev.filter((cat) => cat !== value));
+        break;
       case "sale":
-        setShowSaleOnly(false)
-        break
+        setShowSaleOnly(false);
+        break;
       case "price":
-        setPriceRange([0, maxPrice])
-        break
+        setPriceRange([0, maxPrice]);
+        break;
       case "rating":
-        setMinRating(0)
-        break
+        setMinRating(0);
+        break;
     }
-  }
+    
+    // Reset to page 1 when filters change
+    setPagination({ ...pagination, currentPage: 1 });
+  };
+
+  // Load more products
+  const loadMoreProducts = () => {
+    if (pagination.hasMore) {
+      setPagination({ ...pagination, currentPage: pagination.currentPage + 1 });
+    }
+  };
 
   return (
     <main className="min-h-screen py-8">
@@ -186,24 +240,29 @@ export default function ProductsPage() {
               {searchQuery ? `Search Results: "${searchQuery}"` : "Shop All Products"}
             </h1>
             <p className="text-muted-foreground">
-              {sortedProducts.length} {sortedProducts.length === 1 ? "product" : "products"} found
+              {pagination.totalProducts} {pagination.totalProducts === 1 ? "product" : "products"} found
             </p>
           </div>
 
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <div className="flex gap-2 mt-4 md:mt-0">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" className="md:hidden">
                   <Filter className="h-4 w-4 mr-2" />
-                  Filters {activeFilters > 0 && <Badge className="ml-1 h-5 w-5 p-0">{activeFilters}</Badge>}
+                  Filters
+                  {activeFilters > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
+                      {activeFilters}
+                    </Badge>
+                  )}
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                 <SheetHeader>
                   <SheetTitle className="flex justify-between items-center">
-                    <span>Filters</span>
+                    Filters
                     {activeFilters > 0 && (
-                      <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 px-2">
+                      <Button variant="ghost" size="sm" onClick={resetFilters}>
                         <X className="h-3 w-3 mr-1" />
                         Reset All
                       </Button>
@@ -221,12 +280,13 @@ export default function ProductsPage() {
                             checked={selectedCategories.includes(category.name.toLowerCase())}
                             onCheckedChange={(checked) => {
                               if (checked) {
-                                setSelectedCategories([...selectedCategories, category.name.toLowerCase()])
+                                setSelectedCategories([...selectedCategories, category.name.toLowerCase()]);
                               } else {
                                 setSelectedCategories(
                                   selectedCategories.filter((c) => c !== category.name.toLowerCase()),
-                                )
+                                );
                               }
+                              setPagination({ ...pagination, currentPage: 1 });
                             }}
                           />
                           <Label htmlFor={`category-mobile-${category.id}`}>{category.name}</Label>
@@ -243,9 +303,12 @@ export default function ProductsPage() {
                         max={maxPrice}
                         step={1}
                         value={priceRange}
-                        onValueChange={(value) => setPriceRange(value as [number, number])}
+                        onValueChange={(value) => {
+                          setPriceRange(value as [number, number]);
+                          setPagination({ ...pagination, currentPage: 1 });
+                        }}
                       />
-                      <div className="flex justify-between mt-2 text-sm">
+                      <div className="flex justify-between mt-2">
                         <span>${priceRange[0]}</span>
                         <span>${priceRange[1]}</span>
                       </div>
@@ -254,18 +317,19 @@ export default function ProductsPage() {
 
                   <div className="mb-6">
                     <h3 className="font-medium mb-3">Rating</h3>
-                    <div className="space-y-2">
-                      {[4, 3, 2, 1].map((rating) => (
+                    <div className="flex flex-col gap-2">
+                      {[5, 4, 3, 2, 1].map((rating) => (
                         <div key={rating} className="flex items-center space-x-2">
                           <Checkbox
                             id={`rating-mobile-${rating}`}
                             checked={minRating === rating}
                             onCheckedChange={(checked) => {
-                              setMinRating(checked ? rating : 0)
+                              setMinRating(checked ? rating : 0);
+                              setPagination({ ...pagination, currentPage: 1 });
                             }}
                           />
                           <Label htmlFor={`rating-mobile-${rating}`} className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
+                            {Array.from({ length: 5 }).map((_, i) => (
                               <Star
                                 key={i}
                                 className={`h-4 w-4 ${
@@ -273,7 +337,7 @@ export default function ProductsPage() {
                                 }`}
                               />
                             ))}
-                            <span className="ml-1">& Up</span>
+                            <span className="ml-1">{rating}+ stars</span>
                           </Label>
                         </div>
                       ))}
@@ -281,11 +345,15 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="mb-6">
+                    <h3 className="font-medium mb-3">Other Filters</h3>
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="sale-only-mobile"
                         checked={showSaleOnly}
-                        onCheckedChange={(checked) => setShowSaleOnly(!!checked)}
+                        onCheckedChange={(checked) => {
+                          setShowSaleOnly(!!checked);
+                          setPagination({ ...pagination, currentPage: 1 });
+                        }}
                       />
                       <Label htmlFor="sale-only-mobile">Show sale items only</Label>
                     </div>
@@ -300,7 +368,10 @@ export default function ProductsPage() {
 
             <div className="flex items-center gap-2">
               <span className="text-sm hidden md:inline">Sort by:</span>
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={(value) => {
+                setSortBy(value);
+                setPagination({ ...pagination, currentPage: 1 });
+              }}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -352,18 +423,18 @@ export default function ProductsPage() {
               </Badge>
             ))}
 
-            {(priceRange[0] > 0 || priceRange[1] < maxPrice) && (
+            {priceRange[0] > 0 || priceRange[1] < maxPrice ? (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Price: ${priceRange[0]} - ${priceRange[1]}
                 <Button variant="ghost" size="icon" className="h-4 w-4 p-0 ml-1" onClick={() => removeFilter("price")}>
                   <X className="h-3 w-3" />
                 </Button>
               </Badge>
-            )}
+            ) : null}
 
             {minRating > 0 && (
               <Badge variant="secondary" className="flex items-center gap-1">
-                Rating: {minRating}+ Stars
+                Rating: {minRating}+ stars
                 <Button variant="ghost" size="icon" className="h-4 w-4 p-0 ml-1" onClick={() => removeFilter("rating")}>
                   <X className="h-3 w-3" />
                 </Button>
@@ -411,12 +482,13 @@ export default function ProductsPage() {
                             checked={selectedCategories.includes(category.name.toLowerCase())}
                             onCheckedChange={(checked) => {
                               if (checked) {
-                                setSelectedCategories([...selectedCategories, category.name.toLowerCase()])
+                                setSelectedCategories([...selectedCategories, category.name.toLowerCase()]);
                               } else {
                                 setSelectedCategories(
                                   selectedCategories.filter((c) => c !== category.name.toLowerCase()),
-                                )
+                                );
                               }
+                              setPagination({ ...pagination, currentPage: 1 });
                             }}
                           />
                           <Label htmlFor={`category-${category.id}`} className="text-sm">
@@ -435,7 +507,10 @@ export default function ProductsPage() {
                         max={maxPrice}
                         step={1}
                         value={priceRange}
-                        onValueChange={(value) => setPriceRange(value as [number, number])}
+                        onValueChange={(value) => {
+                          setPriceRange(value as [number, number]);
+                          setPagination({ ...pagination, currentPage: 1 });
+                        }}
                       />
                       <div className="flex justify-between mt-2 text-sm">
                         <span>${priceRange[0]}</span>
@@ -447,25 +522,26 @@ export default function ProductsPage() {
                   <div>
                     <h4 className="text-sm font-medium mb-2">Rating</h4>
                     <div className="space-y-2">
-                      {[4, 3, 2, 1].map((rating) => (
+                      {[5, 4, 3, 2, 1].map((rating) => (
                         <div key={rating} className="flex items-center space-x-2">
                           <Checkbox
                             id={`rating-${rating}`}
                             checked={minRating === rating}
                             onCheckedChange={(checked) => {
-                              setMinRating(checked ? rating : 0)
+                              setMinRating(checked ? rating : 0);
+                              setPagination({ ...pagination, currentPage: 1 });
                             }}
                           />
                           <Label htmlFor={`rating-${rating}`} className="flex items-center text-sm">
-                            {[...Array(5)].map((_, i) => (
+                            {Array.from({ length: 5 }).map((_, i) => (
                               <Star
                                 key={i}
-                                className={`h-4 w-4 ${
+                                className={`h-3 w-3 ${
                                   i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
                                 }`}
                               />
                             ))}
-                            <span className="ml-1">& Up</span>
+                            <span className="ml-1">{rating}+ stars</span>
                           </Label>
                         </div>
                       ))}
@@ -473,11 +549,15 @@ export default function ProductsPage() {
                   </div>
 
                   <div>
+                    <h4 className="text-sm font-medium mb-2">Other Filters</h4>
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="sale-only"
                         checked={showSaleOnly}
-                        onCheckedChange={(checked) => setShowSaleOnly(!!checked)}
+                        onCheckedChange={(checked) => {
+                          setShowSaleOnly(!!checked);
+                          setPagination({ ...pagination, currentPage: 1 });
+                        }}
                       />
                       <Label htmlFor="sale-only" className="text-sm">
                         Show sale items only
@@ -491,7 +571,21 @@ export default function ProductsPage() {
 
           {/* Products Grid */}
           <div className="flex-1">
-            {sortedProducts.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="rounded-md bg-gray-200 h-64 mb-3"></div>
+                    <div className="bg-gray-200 h-5 w-3/4 mb-2 rounded"></div>
+                    <div className="bg-gray-200 h-4 w-1/2 mb-3 rounded"></div>
+                    <div className="flex justify-between items-center">
+                      <div className="bg-gray-200 h-6 w-1/4 rounded"></div>
+                      <div className="bg-gray-200 h-9 w-1/3 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : products.length === 0 ? (
               <div className="text-center py-12">
                 <h3 className="text-lg font-medium mb-2">No products found</h3>
                 <p className="text-muted-foreground mb-4">Try adjusting your filters or search criteria</p>
@@ -503,20 +597,20 @@ export default function ProductsPage() {
               <>
                 {viewMode === "grid" ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {sortedProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                    {products.map((product) => (
+                      <ProductCard key={product._id} product={product} />
                     ))}
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {sortedProducts.map((product) => (
+                    {products.map((product) => (
                       <div
-                        key={product.id}
+                        key={product._id}
                         className="flex flex-col sm:flex-row gap-4 bg-white rounded-lg overflow-hidden shadow-pastel p-4"
                       >
                         <div className="relative h-48 sm:h-40 sm:w-40 rounded-md overflow-hidden">
                           <img
-                            src={product.image || "/placeholder.svg"}
+                            src={product.img || "/placeholder.svg"}
                             alt={product.name}
                             className="absolute inset-0 w-full h-full object-cover"
                           />
@@ -567,7 +661,7 @@ export default function ProductsPage() {
                                 variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  router.push(`/products/${product.id}`)
+                                  router.push(`/products/${product._id}`)
                                 }}
                               >
                                 View Details
@@ -577,6 +671,15 @@ export default function ProductsPage() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {pagination.hasMore && (
+                  <div className="mt-8 text-center">
+                    <Button onClick={loadMoreProducts} variant="outline" size="lg">
+                      Load More Products
+                    </Button>
                   </div>
                 )}
               </>

@@ -3,24 +3,22 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 
 export type WishlistItem = {
-  id: number
+  _id: string
   name: string
   price: number
   salePrice: number | null
-  image: string
-  category: string
-  description: string
+  img: string
+  badge: string | null
   rating: number
   reviewCount: number
-  badge: string | null
 }
 
 type WishlistContextType = {
   items: WishlistItem[]
   addItem: (item: WishlistItem) => void
-  removeItem: (id: number) => void
+  removeItem: (id: string) => void
   clearWishlist: () => void
-  isInWishlist: (id: number) => boolean
+  isInWishlist: (id: string) => boolean
   itemCount: number
 }
 
@@ -53,7 +51,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const addItem = (newItem: WishlistItem) => {
     setItems((prevItems) => {
-      const existingItemIndex = prevItems.findIndex((item) => item.id === newItem.id)
+      const existingItemIndex = prevItems.findIndex((item) => item._id === newItem._id)
 
       if (existingItemIndex > -1) {
         // Item already exists in wishlist, don't add it again
@@ -65,16 +63,16 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const removeItem = (id: number) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id))
+  const removeItem = (id: string) => {
+    setItems((prevItems) => prevItems.filter((item) => item._id !== id))
   }
 
   const clearWishlist = () => {
     setItems([])
   }
 
-  const isInWishlist = (id: number) => {
-    return items.some((item) => item.id === id)
+  const isInWishlist = (id: string) => {
+    return items.some((item) => item._id === id)
   }
 
   const itemCount = items.length

@@ -1,5 +1,3 @@
-
-
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -13,12 +11,12 @@ import { useWishlist } from "@/lib/wishlist-context"
 import { useToast } from "@/hooks/use-toast"
 
 interface Product {
-  id: number
+  _id: string
   name: string
   description: string
   price: number
   salePrice?: number | null
-  image: string
+  img: string
   images?: string[]
   category: string
   badge?: string | null
@@ -38,9 +36,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  const inWishlist = isInWishlist(product.id)
+  const inWishlist = isInWishlist(product._id)
 
-  const productImages = product.images?.length ? product.images : [product.image]
+  const productImages = product.images?.length ? product.images : [product.img]
 
   useEffect(() => {
     if (!isHovered) {
@@ -55,11 +53,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation()
 
     addItem({
-      id: product.id,
+      id: product._id,
       name: product.name,
       price: product.price,
       salePrice: product.salePrice ?? null,
-      image: product.image,
+      image: product.img,
       quantity: 1,
     })
 
@@ -73,7 +71,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation()
 
     if (inWishlist) {
-      removeFromWishlist(product.id)
+      removeFromWishlist(product._id)
       toast({
         title: "Removed from wishlist",
         description: `${product.name} has been removed from your wishlist.`,
@@ -88,7 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   const handleCardClick = () => {
-    router.push(`/products/${product.id}`)
+    router.push(`/products/${product._id}`)
   }
 
   return (
