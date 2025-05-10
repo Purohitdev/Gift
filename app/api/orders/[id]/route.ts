@@ -10,7 +10,8 @@ export async function GET(
   try {
     await connectDB();
     
-    const id = params.id;
+    // Await params to get the id
+    const { id } = await params;
     
     // Check if ID is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -21,8 +22,7 @@ export async function GET(
     }
     
     const order = await Order.findById(id)
-      .populate('user', 'name email')
-      .populate('items.product', 'name price salePrice img');
+      .populate('user', 'name email');
     
     if (!order) {
       return NextResponse.json(
@@ -48,7 +48,8 @@ export async function PUT(
   try {
     await connectDB();
     
-    const id = params.id;
+    // Await params to get the id
+    const { id } = await params;
     
     // Check if ID is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -91,7 +92,8 @@ export async function DELETE(
   try {
     await connectDB();
     
-    const id = params.id;
+    // Await params to get the id
+    const { id } = await params;
     
     // Check if ID is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -1,0 +1,49 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProductsList from "@/components/admin/products-list";
+import { PlusCircle } from "lucide-react";
+
+export default function AdminPage() {
+  const [activeTab, setActiveTab] = useState("products");
+
+  return (
+    <div className="container py-10">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          
+          {activeTab === "products" && (
+            <Button asChild>
+              <Link href="/admin/products/new">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Product
+              </Link>
+            </Button>
+          )}
+        </div>
+        
+        <Tabs defaultValue="products" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
+            <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="products" className="mt-6">
+            <ProductsList />
+          </TabsContent>
+          
+          <TabsContent value="orders" className="mt-6">
+            <div className="flex flex-col items-center justify-center h-[400px] border rounded-md bg-gray-50">
+              <h3 className="text-xl font-medium text-gray-500">Orders Management</h3>
+              <p className="text-muted-foreground mt-2">Coming Soon</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
