@@ -65,15 +65,18 @@ export default function ProductsList() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<Product | null>(null);
+  const [fetchSource, setFetchSource] = useState<string>("");
 
   // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setFetchSource("Fetching from cache...");
         const response = await fetch("/api/products");
         if (response.ok) {
           const data = await response.json();
           setProducts(data.products || []); // Extract the products array from the response
+          setFetchSource(data.fromCache ? "Loaded from cache" : "Loaded from server");
         } else {
           toast({
             title: "Error",
@@ -308,6 +311,9 @@ export default function ProductsList() {
       <CardFooter className="flex justify-between">
         <div className="text-sm text-muted-foreground">
           Showing {filteredProducts.length} of {products.length} products
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {fetchSource}
         </div>
       </CardFooter>
 

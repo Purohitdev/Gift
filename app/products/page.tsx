@@ -36,6 +36,7 @@ export default function ProductsPage() {
     totalProducts: 0,
     hasMore: false
   })
+  const [fetchSource, setFetchSource] = useState<string>("");
 
   // State for UI
   const [maxPrice, setMaxPrice] = useState<number>(1000)
@@ -72,68 +73,50 @@ export default function ProductsPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      
       try {
-        // Build query params for API request
+        setFetchSource("Fetching from cache...");
         const params = new URLSearchParams();
-        
         if (selectedCategories.length > 0) {
           params.set('category', selectedCategories.join(','));
         }
-        
         if (showSaleOnly) {
           params.set('sale', 'true');
         }
-        
         if (priceRange[0] > 0) {
           params.set('minPrice', priceRange[0].toString());
         }
-        
         if (priceRange[1] < maxPrice) {
           params.set('maxPrice', priceRange[1].toString());
         }
-        
         if (minRating > 0) {
           params.set('rating', minRating.toString());
         }
-        
         if (sortBy) {
           params.set('sort', sortBy);
         }
-        
         if (searchQuery) {
           params.set('search', searchQuery);
         }
-        
-        // Add pagination
         params.set('page', pagination.currentPage.toString());
-        
+
         const response = await fetch(`/api/products?${params.toString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
-        
+
         const data = await response.json();
         setProducts(data.products);
         setPagination(data.pagination);
-        
-        // If this is the first load, set the max price based on the most expensive product
-        if (products.length === 0) {
-          const maxProductPrice = Math.max(...data.products.map((p: any) => p.price), 0);
-          setMaxPrice(maxProductPrice > 0 ? maxProductPrice : 1000);
-          if (!maxPriceParam) {
-            setPriceRange([priceRange[0], maxProductPrice]);
-          }
-        }
+        setFetchSource(data.fromCache ? "Loaded from cache" : "Loaded from server");
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
-    
+
     // Count active filters
     let filterCount = 0;
     if (selectedCategories.length > 0) filterCount++;
@@ -141,42 +124,42 @@ export default function ProductsPage() {
     if (priceRange[0] > 0 || priceRange[1] < maxPrice) filterCount++;
     if (minRating > 0) filterCount++;
     setActiveFilters(filterCount);
-    
+
     // Update URL without refreshing the page
     const params = new URLSearchParams();
-    
+
     if (selectedCategories.length > 0) {
       params.set('category', selectedCategories.join(','));
     }
-    
+
     if (showSaleOnly) {
       params.set('sale', 'true');
     }
-    
+
     if (priceRange[0] > 0) {
       params.set('minPrice', priceRange[0].toString());
     }
-    
+
     if (priceRange[1] < maxPrice) {
       params.set('maxPrice', priceRange[1].toString());
     }
-    
+
     if (minRating > 0) {
       params.set('rating', minRating.toString());
     }
-    
+
     if (sortBy !== 'featured') {
       params.set('sort', sortBy);
     }
-    
+
     if (searchQuery) {
       params.set('search', searchQuery);
     }
-    
+
     if (pagination.currentPage > 1) {
       params.set('page', pagination.currentPage.toString());
     }
-    
+
     const url = `/products?${params.toString()}`;
     router.push(url, { scroll: false });
   }, [selectedCategories, showSaleOnly, priceRange, minRating, sortBy, pagination.currentPage, searchQuery]);
@@ -219,7 +202,7 @@ export default function ProductsPage() {
         setMinRating(0);
         break;
     }
-    
+
     // Reset to page 1 when filters change
     setPagination({ ...pagination, currentPage: 1 });
   };

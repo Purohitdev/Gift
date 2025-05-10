@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import clientPromise from '@/lib/mongodb';
 import Category from '@/lib/models/Category';
+import NodeCache from 'node-cache';
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -16,12 +17,23 @@ const connectDB = async () => {
   }
 };
 
+// Initialize cache with a default TTL of 1 hour
+const cache = new NodeCache({ stdTTL: 3600 });
+
 export async function GET(req: NextRequest) {
   try {
+    // Check if categories are cached
+    const cachedCategories = cache.get('categories');
+    if (cachedCategories) {
+      return NextResponse.json(cachedCategories);
+    }
+
     await connectDB();
-    
     const categories = await Category.find({}).sort({ name: 1 });
-    
+
+    // Cache the categories
+    cache.set('categories', categories);
+
     return NextResponse.json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);

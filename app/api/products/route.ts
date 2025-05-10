@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import Product from '@/lib/models/Product';
 import mongoose from 'mongoose';
+import NodeCache from 'node-cache';
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -18,11 +19,11 @@ const connectDB = async () => {
   }
 };
 
+// Initialize cache with a default TTL of 1 hour
+const cache = new NodeCache({ stdTTL: 3600 });
+
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
-
-    // Get query parameters
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
@@ -34,15 +35,17 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    // Build query
-    let query: any = {};
-
-    // Category filter
-    if (category) {
-      query.category = { $in: category.split(',') };
+    // Generate a cache key based on query parameters
+    const cacheKey = `products-${category}-${search}-${minPrice}-${maxPrice}-${rating}-${sale}-${sort}-${page}-${limit}`;
+    const cachedProducts = cache.get(cacheKey);
+    if (cachedProducts) {
+      return NextResponse.json(cachedProducts);
     }
 
-    // Search filter
+    await connectDB();
+
+    let query: any = {};
+    if (category) query.category = { $in: category.split(',') };
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -50,25 +53,14 @@ export async function GET(req: NextRequest) {
         { category: { $regex: search, $options: 'i' } }
       ];
     }
-
-    // Price filter
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = parseInt(minPrice);
       if (maxPrice) query.price.$lte = parseInt(maxPrice);
     }
+    if (rating) query.rating = { $gte: parseInt(rating) };
+    if (sale) query.salePrice = { $ne: null };
 
-    // Rating filter
-    if (rating) {
-      query.rating = { $gte: parseInt(rating) };
-    }
-
-    // Sale filter
-    if (sale) {
-      query.salePrice = { $ne: null };
-    }
-
-    // Build sort
     let sortQuery = {};
     switch (sort) {
       case 'price-low':
@@ -83,24 +75,16 @@ export async function GET(req: NextRequest) {
       case 'newest':
         sortQuery = { createdAt: -1 };
         break;
-      default: // featured
+      default:
         sortQuery = { featured: -1, rating: -1, reviewCount: -1 };
     }
 
-    // Calculate pagination
     const skip = (page - 1) * limit;
-
-    // Execute query
-    const products = await Product.find(query)
-      .sort(sortQuery)
-      .skip(skip)
-      .limit(limit);
-
-    // Get total count for pagination
+    const products = await Product.find(query).sort(sortQuery).skip(skip).limit(limit);
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);
 
-    return NextResponse.json({
+    const response = {
       products,
       pagination: {
         currentPage: page,
@@ -108,7 +92,12 @@ export async function GET(req: NextRequest) {
         totalProducts,
         hasMore: page < totalPages
       }
-    });
+    };
+
+    // Cache the response
+    cache.set(cacheKey, response);
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(
