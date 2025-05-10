@@ -29,3 +29,15 @@ The error occurs because the `image` and `product` fields are required in the or
 - Ensure that the `image` and `product` fields are correctly populated when passing product data from the **detail page** to the order creation function.
 - Verify the data flow and update the logic to include the required fields before making the API call.
 
+
+
+![params.id error ](image.png)
+#### Error Description:
+after successfull placement of order, the user is redirected to the checkout page. The following error log is generated:
+
+params.id error --> params.id is not used in newer versions of the nextjs using app router.
+
+#### Fix:
+add a await before the params.id in the checkout page.
+--> something like this it can be solved 
+```javascript
