@@ -64,3 +64,8 @@
 .shadow-pastel {
   box-shadow: 0 4px 20px rgba(202, 189, 255, 0.2);
 }
+
+
+*{
+  overscroll-behavior: none;
+}

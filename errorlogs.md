@@ -41,3 +41,11 @@ params.id error --> params.id is not used in newer versions of the nextjs using 
 add a await before the params.id in the checkout page.
 --> something like this it can be solved 
 ```javascript
+
+
+
+
+
+admin panel acces using email and and errors
+
+card details
