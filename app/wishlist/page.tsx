@@ -62,12 +62,12 @@ export default function WishlistPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {items.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="group relative bg-white rounded-lg overflow-hidden shadow-pastel transition-all duration-300 hover:shadow-lg"
                 >
-                  <Link href={`/products/${item.id}`} className="block relative h-64 w-full overflow-hidden">
+                  <Link href={`/products/${item._id}`} className="block relative h-64 w-full overflow-hidden">
                     <Image
-                      src={item.image || "/placeholder.svg"}
+                      src={item.img || "/placeholder.svg"}
                       alt={item.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -91,17 +91,17 @@ export default function WishlistPage() {
                     variant="ghost"
                     size="icon"
                     className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/80 text-red-500 hover:bg-white hover:text-red-600"
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => removeItem(item._id)}
                     aria-label="Remove from wishlist"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
 
                   <div className="p-4">
-                    <Link href={`/products/${item.id}`}>
+                    <Link href={`/products/${item._id}`}>
                       <h3 className="font-medium text-lg mb-1 transition-colors hover:text-primary">{item.name}</h3>
                     </Link>
-                    <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                    <p className="text-sm text-muted-foreground mb-2">{item.badge || "No description available"}</p>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (

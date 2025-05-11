@@ -10,11 +10,13 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import CartDropdown from "@/components/layout/cart-dropdown"
 import WishlistDropdown from "@/components/layout/wishlist-dropdown"
 import { useRouter } from "next/navigation"
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs"
 
 export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const router = useRouter()
+  const { isSignedIn } = useUser()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -104,6 +106,11 @@ export default function Header() {
 
           <WishlistDropdown />
           <CartDropdown />
+          {isSignedIn ? (
+            <UserButton />
+          ) : (
+            <SignInButton mode="redirect">Sign In</SignInButton>
+          )}
         </div>
       </div>
     </header>

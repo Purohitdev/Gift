@@ -10,6 +10,17 @@ import { useCart } from "@/lib/cart-context"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 
+type WishlistItem = {
+  _id: string
+  name: string
+  price: number
+  salePrice: number | null
+  img: string
+  badge: string | null
+  rating: number
+  reviewCount: number
+}
+
 export default function WishlistDropdown() {
   const { items, itemCount, removeItem } = useWishlist()
   const { addItem } = useCart()
@@ -67,15 +78,15 @@ export default function WishlistDropdown() {
           <>
             <div className="max-h-[300px] overflow-auto space-y-3 mb-4">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-3 py-2 border-b">
+                <div key={item._id} className="flex gap-3 py-2 border-b">
                   <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
-                    <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                    <Image src={item.img || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
                   </div>
                   <div className="flex-1">
-                    <Link href={`/products/${item.id}`} onClick={() => setIsOpen(false)}>
+                    <Link href={`/products/${item._id}`} onClick={() => setIsOpen(false)}>
                       <h4 className="text-sm font-medium hover:text-primary">{item.name}</h4>
                     </Link>
-                    <p className="text-xs text-muted-foreground">{item.category}</p>
+                    <p className="text-xs text-muted-foreground">{item.badge}</p>
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-sm font-medium">
                         {item.salePrice ? (
@@ -101,7 +112,7 @@ export default function WishlistDropdown() {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item._id)}
                           title="Remove from wishlist"
                         >
                           <Trash2 className="h-3 w-3" />

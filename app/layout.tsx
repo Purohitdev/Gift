@@ -1,13 +1,18 @@
-import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Playfair_Display } from "next/font/google"
 import "./globals.css"
+
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/lib/cart-context"
 import { WishlistProvider } from "@/lib/wishlist-context"
 
+import {
+  ClerkProvider,
+} from "@clerk/nextjs"
+
+// Load fonts with CSS variables
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -20,30 +25,39 @@ const playfair = Playfair_Display({
   display: "swap",
 })
 
+// Static site metadata
 export const metadata: Metadata = {
   title: "Gifty - Personalized Gift Shop",
   description: "Find the perfect personalized gift for your loved ones",
-    generator: 'dev'
 }
 
+// Root layout component
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="min-h-screen bg-white font-sans">
-        <ThemeProvider attribute="class" defaultTheme="light">
-          <CartProvider>
-            <WishlistProvider>
-              <Header />
-              {children}
-              <Footer />
-            </WishlistProvider>
-          </CartProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${inter.variable} ${playfair.variable} font-sans bg-white min-h-screen`}>
+          <ThemeProvider 
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            forcedTheme="light"
+            storageKey="gift-theme-preference"
+          >
+            <CartProvider>
+              <WishlistProvider>
+                <Header />
+                {children}
+                <Footer />
+              </WishlistProvider>
+            </CartProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
