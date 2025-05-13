@@ -72,7 +72,7 @@ export default function TestimonialsCarousel() {
             >
               {testimonials.map((testimonial, index) => (
                 <div key={testimonial.id} className="w-full md:w-1/2 xl:w-1/3 flex-shrink-0 px-4">
-                  <div className="bg-white rounded-lg p-6 shadow-pastel h-full flex flex-col">
+                  <div className="bg-white/60 rounded-lg p-6 shadow-pastel h-full flex flex-col">
                     <div className="flex items-center mb-4">
                       <div className="relative h-12 w-12 rounded-full overflow-hidden mr-4">
                         <Image
@@ -126,7 +126,9 @@ export default function TestimonialsCarousel() {
 
         <div className="mt-8 text-center">
           <Link href="/testimonials">
-            <Button variant="outline">View All Testimonials</Button>
+          <Button variant="outline" className="mt-4 md:mt-0 bg-white/40 border-[#12121253]">
+          View All Testimonials</Button>
+            
           </Link>
         </div>
       </div>

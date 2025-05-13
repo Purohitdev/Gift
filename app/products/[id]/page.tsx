@@ -63,7 +63,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen container px-4 py-8">
+      <div className=" container px-4 py-8 min-h-screen bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <div className="animate-pulse bg-gray-200 h-96 rounded-lg"></div>
           <div className="space-y-4">
@@ -82,7 +82,7 @@ export default function ProductDetailPage() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen container px-4 py-8 flex items-center justify-center">
+      <div className="min-h-screen container px-4 py-8 flex items-center justify-center ">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
           <p className="text-muted-foreground mb-6">{error || "The product you're looking for doesn't exist or has been removed."}</p>
@@ -95,7 +95,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <main className="min-h-screen pb-16">
+    <main className="min-h-screen pb-16 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <ProductGallery product={product} />

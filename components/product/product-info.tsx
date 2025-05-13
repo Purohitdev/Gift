@@ -76,7 +76,7 @@ export default function ProductInfo({ product }: { product: any }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       <div>
         <h1 className="text-2xl md:text-3xl font-serif font-bold">{product.name}</h1>
         <div className="flex items-center gap-2 mt-2">
@@ -145,7 +145,7 @@ export default function ProductInfo({ product }: { product: any }) {
         <div className="space-y-2">
           <Label htmlFor="frame-size">Frame Size</Label>
           <Select value={frameSize} onValueChange={setFrameSize}>
-            <SelectTrigger id="frame-size">
+            <SelectTrigger id="frame-size" className="bg-white/40">
               <SelectValue placeholder="Select size" />
             </SelectTrigger>
             <SelectContent>
@@ -159,7 +159,7 @@ export default function ProductInfo({ product }: { product: any }) {
         <div className="space-y-2">
           <Label htmlFor="delivery">Delivery Priority</Label>
           <Select value={delivery} onValueChange={setDelivery}>
-            <SelectTrigger id="delivery">
+            <SelectTrigger id="delivery" className="bg-white/40">
               <SelectValue placeholder="Select delivery" />
             </SelectTrigger>
             <SelectContent>
@@ -182,7 +182,7 @@ export default function ProductInfo({ product }: { product: any }) {
               value={whatsappNumber}
               onChange={(e) => setWhatsappNumber(e.target.value)}
               required
-              className="flex-1"
+              className="flex-1 bg-white/40"
             />
           </div>
           <p className="text-xs text-muted-foreground">We'll send you design proofs and updates via WhatsApp</p>
