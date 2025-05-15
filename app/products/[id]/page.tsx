@@ -96,13 +96,12 @@ export default function ProductDetailPage() {
 
   return (
     <main className="min-h-screen pb-16 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
-      <div className="container px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="container px-4 py-8">        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <ProductGallery product={product} />
           <ProductInfo product={product} />
         </div>
 
-        <ProductHighlights />
+        <ProductHighlights highlights={product.highlights} />
         <SampleWorks />
         <FaqSection />
       </div>

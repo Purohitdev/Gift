@@ -16,8 +16,8 @@ interface Product {
   description: string
   price: number
   salePrice?: number | null
-  img: string
-  images?: string[]
+  img?: Buffer
+  images?: { data: Buffer, contentType: string }[]
   category: string
   badge?: string | null
   rating: number
@@ -38,7 +38,17 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const inWishlist = isInWishlist(product._id)
 
-  const productImages = product.images?.length ? product.images : [product.img]
+  const productImages = []
+  
+  // Add main image
+  productImages.push(`/api/products/${product._id}/image`)
+  
+  // Add additional images
+  if (product.images?.length) {
+    for (let i = 0; i < product.images.length; i++) {
+      productImages.push(`/api/products/${product._id}/images/${i}`)
+    }
+  }
 
   useEffect(() => {
     if (!isHovered) {
@@ -52,12 +62,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
 
-    addItem({
-      id: product._id,
+    addItem({      id: product._id,
       name: product.name,
       price: product.price,
       salePrice: product.salePrice ?? null,
-      image: product.img,
+      image: `/api/products/${product._id}/image`,
       quantity: 1,
     })
 
@@ -77,7 +86,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         description: `${product.name} has been removed from your wishlist.`,
       })
     } else {
-      addToWishlist({ ...product, salePrice: product.salePrice ?? null, badge: product.badge ?? null })
+      addToWishlist({ 
+        ...product, 
+        salePrice: product.salePrice ?? null, 
+        badge: product.badge ?? null,
+        img: `/api/products/${product._id}/image`
+      })
       toast({
         title: "Added to wishlist",
         description: `${product.name} has been added to your wishlist.`,

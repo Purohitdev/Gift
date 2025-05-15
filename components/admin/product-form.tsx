@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { X } from "lucide-react";
 
 // Define schema for form validation
 const productSchema = z.object({
@@ -33,12 +34,14 @@ const productSchema = z.object({
   description: z.string().min(1, "Description is required").max(1000),
   price: z.coerce.number().min(0, "Price must be a positive number"),
   salePrice: z.coerce.number().nullable().optional(),
-  img: z.string().min(1, "Main image URL is required"),
-  images: z.union([z.string(), z.array(z.string())]).optional(),
   category: z.string().min(1, "Category is required"),
   badge: z.string().nullable().optional(),
   stock: z.coerce.number().min(0, "Stock must be a positive number"),
   featured: z.boolean().default(false),
+  highlights: z.array(z.string()).default([]),
+  // File upload fields
+  mainImage: z.any().optional(),
+  additionalImages: z.any().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -52,6 +55,11 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [additionalImages, setAdditionalImages] = useState<File[]>([]);
+  const [highlights, setHighlights] = useState<string[]>([""]);
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
+  const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>([]);
 
   // Initialize form with either initial data or default values
   const form = useForm<ProductFormValues>({
@@ -61,12 +69,11 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
       description: "",
       price: 0,
       salePrice: null,
-      img: "",
-      images: "",
       category: "",
       badge: null,
       stock: 10,
       featured: false,
+      highlights: [],
     },
   });
 
@@ -87,18 +94,112 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     fetchCategories();
   }, []);
 
+  // Initialize highlights if editing a product with existing highlights
+  useEffect(() => {
+    if (initialData?.highlights?.length) {
+      setHighlights(initialData.highlights);
+    }
+  }, [initialData]);
+
+  // Handle image file selection and preview
+  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setMainImage(file);
+      form.setValue('mainImage', file);
+      
+      // Create and set preview URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setMainImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setAdditionalImages(files);
+      form.setValue('additionalImages', files);
+      
+      // Create and set preview URLs
+      const previews: string[] = [];
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            previews.push(event.target.result as string);
+            if (previews.length === files.length) {
+              setAdditionalImagePreviews(previews);
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  // Handle highlights management
+  const addHighlight = () => {
+    setHighlights([...highlights, ""]);
+  };
+
+  const removeHighlight = (index: number) => {
+    const newHighlights = [...highlights];
+    newHighlights.splice(index, 1);
+    setHighlights(newHighlights);
+  };
+
+  const updateHighlight = (index: number, value: string) => {
+    const newHighlights = [...highlights];
+    newHighlights[index] = value;
+    setHighlights(newHighlights);
+  };
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setIsSubmitting(true);
 
-      // Convert images string to array if provided
-      if (data.images && typeof data.images === "string") {
-        data.images = data.images.split(",").map(url => url.trim());
+      // Validate that a main image is selected
+      if (!isEditing && !mainImage) {
+        toast({
+          title: "Error",
+          description: "Please select a main image for the product",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create FormData to handle file uploads
+      const formData = new FormData();
+      
+      // Add all form fields to FormData
+      Object.keys(data).forEach((key) => {
+        if (key !== 'highlights' && key !== 'mainImage' && key !== 'additionalImages') {
+          // @ts-ignore
+          formData.append(key, data[key]);
+        }
+      });
+      
+      // Add highlights array (filter out empty values)
+      const filteredHighlights = highlights.filter(h => h.trim() !== "");
+      formData.append('highlights', JSON.stringify(filteredHighlights));
+      
+      // Add images
+      if (mainImage) {
+        formData.append('mainImage', mainImage);
+      }
+      
+      if (additionalImages.length > 0) {
+        additionalImages.forEach((image) => {
+          formData.append('additionalImages', image);
+        });
       }
 
       // Handle the "none" value for badge
       if (data.badge === "none") {
-        data.badge = null;
+        formData.set('badge', '');
       }
 
       // Determine if we're creating or updating
@@ -110,10 +211,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+        body: formData,
       });
 
       if (response.ok) {
@@ -130,6 +228,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         throw new Error(errorData.message || "Something went wrong");
       }
     } catch (error: any) {
+      console.error("Error submitting product form:", error);
       toast({
         title: "Error",
         description: error.message || `Failed to ${isEditing ? "update" : "create"} product`,
@@ -204,9 +303,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
                 <FormMessage />
               </FormItem>
             )}
-          />
-
-          <FormField
+          />          <FormField
             control={form.control}
             name="salePrice"
             render={({ field }) => (
@@ -234,44 +331,64 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="img"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Main Image URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://example.com/image.jpg" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormItem>
+            <FormLabel>Main Image</FormLabel>
+            <FormControl>
+              <div className="flex flex-col gap-2">
+                <Input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleMainImageChange}
+                  className="cursor-pointer"
+                />
+                {mainImagePreview && (
+                  <div className="mt-2">
+                    <p className="text-sm text-muted-foreground mb-1">Preview:</p>
+                    <img 
+                      src={mainImagePreview} 
+                      alt="Main image preview" 
+                      className="h-32 object-contain border rounded-md" 
+                    />
+                  </div>
+                )}
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
 
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Additional Images URLs (Optional)</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="URL1, URL2, URL3" 
-                    {...field} 
-                    value={
-                      Array.isArray(field.value) 
-                        ? field.value.join(", ") 
-                        : field.value || ""
-                    }
-                  />
-                </FormControl>
-                <FormDescription>
-                  Separate multiple URLs with commas
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormItem>
+            <FormLabel>Additional Images (Optional)</FormLabel>
+            <FormControl>
+              <div className="flex flex-col gap-2">
+                <Input 
+                  type="file" 
+                  accept="image/*"
+                  multiple
+                  onChange={handleAdditionalImagesChange}
+                  className="cursor-pointer"
+                />
+                {additionalImagePreviews.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm text-muted-foreground mb-1">Previews:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {additionalImagePreviews.map((preview, index) => (
+                        <img 
+                          key={index}
+                          src={preview} 
+                          alt={`Additional image ${index + 1}`} 
+                          className="h-20 w-20 object-cover border rounded-md" 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </FormControl>
+            <FormDescription>
+              You can select multiple images at once
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
 
           <FormField
             control={form.control}
@@ -358,6 +475,45 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
             </FormItem>
           )}
         />
+
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Product Highlights</h3>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm"
+              onClick={addHighlight}
+            >
+              Add Highlight
+            </Button>
+          </div>
+          
+          <div className="space-y-3">
+            {highlights.map((highlight, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={highlight}
+                  onChange={(e) => updateHighlight(index, e.target.value)}
+                  placeholder="Enter a product highlight"
+                  className="flex-grow"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => removeHighlight(index)}
+                  disabled={highlights.length <= 1}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Add key selling points or features of your product
+          </p>
+        </div>
 
         <div className="flex justify-end gap-3">
           <Button

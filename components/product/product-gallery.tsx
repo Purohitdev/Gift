@@ -8,18 +8,30 @@ import { ChevronLeft, ChevronRight, ZoomIn, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 type Product = {
+  _id: string
   name: string
   img?: string
-  images?: string[]
+  images?: { data: Buffer, contentType: string }[]
 }
 
 export default function ProductGallery({ product }: { product: Product }) {
   const [currentImage, setCurrentImage] = useState(0)
   const [isAutoplay, setIsAutoplay] = useState(true)
-
-  const images: string[] = product.images?.length
-    ? product.images
-    : [product.img || "/placeholder.svg"]
+  const images: string[] = []
+  
+  // Add main image
+  if (product._id) {
+    images.push(`/api/products/${product._id}/image`)
+  } else {
+    images.push('/placeholder.svg')
+  }
+  
+  // Add additional images
+  if (product._id && product.images?.length) {
+    for (let i = 0; i < product.images.length; i++) {
+      images.push(`/api/products/${product._id}/images/${i}`)
+    }
+  }
 
   const nextImage = () => {
     setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1))
