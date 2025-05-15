@@ -33,7 +33,7 @@ export default function AdminPage() {
   if (!email || !allowedEmails.includes(email)) return null;
 
   return (
-    <div className=" py-10 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8] text-gray-800">
+    <div className=" py-10 container text-gray-800">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
