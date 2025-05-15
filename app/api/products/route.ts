@@ -3,6 +3,9 @@ import clientPromise from '@/lib/mongodb';
 import Product from '@/lib/models/Product';
 import mongoose from 'mongoose';
 import NodeCache from 'node-cache';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
+import { mkdir } from 'fs/promises';
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -107,15 +110,68 @@ export async function GET(req: NextRequest) {
   }
 }
 
+async function saveFile(file: File, path: string): Promise<{ data: Buffer, contentType: string }> {
+  // Convert file to buffer
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  
+  // Save file to disk (optional, for debugging)
+  // try {
+  //   await mkdir(join(process.cwd(), 'uploads'), { recursive: true });
+  //   await writeFile(join(process.cwd(), 'uploads', path), buffer);
+  // } catch (error) {
+  //   console.error('Error saving file to disk:', error);
+  // }
+  
+  return {
+    data: buffer,
+    contentType: file.type
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    // Parse the request body
-    const body = await req.json();
+    // Handle the FormData
+    const formData = await req.formData();
+    const data: Record<string, any> = {};
+    
+    // Process regular form fields
+    for (const [key, value] of formData.entries()) {
+      if (key !== 'mainImage' && key !== 'additionalImages' && key !== 'highlights') {
+        data[key] = value;
+      }
+    }
+    
+    // Process highlights JSON
+    const highlightsJson = formData.get('highlights');
+    if (highlightsJson && typeof highlightsJson === 'string') {
+      data.highlights = JSON.parse(highlightsJson);
+    }
+    
+    // Process main image file
+    const mainImage = formData.get('mainImage') as File | null;
+    if (mainImage) {
+      const savedFile = await saveFile(mainImage, `product-${Date.now()}-main.${mainImage.name.split('.').pop()}`);
+      data.img = savedFile.data;
+      data.imgType = savedFile.contentType;
+    }
+    
+    // Process additional images
+    const additionalImageFiles = formData.getAll('additionalImages') as File[];
+    if (additionalImageFiles.length > 0) {
+      data.images = await Promise.all(additionalImageFiles.map(async (file, index) => {
+        const savedFile = await saveFile(file, `product-${Date.now()}-${index}.${file.name.split('.').pop()}`);
+        return {
+          data: savedFile.data,
+          contentType: savedFile.contentType
+        };
+      }));
+    }
 
     // Create a new product
-    const product = await Product.create(body);
+    const product = await Product.create(data);
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {

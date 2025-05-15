@@ -21,10 +21,21 @@ const ProductSchema = new mongoose.Schema({
     default: null
   },
   img: {
-    type: String,
+    type: Buffer,
     required: [true, 'Please provide a main product image']
   },
+  imgType: {
+    type: String,
+    required: [true, 'Please provide the image type']
+  },
   images: {
+    type: [{
+      data: Buffer,
+      contentType: String
+    }],
+    default: []
+  },
+  highlights: {
     type: [String],
     default: []
   },

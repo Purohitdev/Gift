@@ -69,23 +69,63 @@ export async function PUT(
       );
     }
     
-    const body = await req.json();
-    
-    // Find the product and update it
-    const product = await Product.findByIdAndUpdate(
-      id,
-      { ...body, updatedAt: Date.now() },
-      { new: true, runValidators: true }
-    );
-    
-    if (!product) {
+    // Find the existing product to check if it exists
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 }
       );
     }
+
+    // Handle the FormData
+    const formData = await req.formData();
+    const data: Record<string, any> = {};
     
-    return NextResponse.json(product);
+    // Process regular form fields
+    for (const [key, value] of formData.entries()) {
+      if (key !== 'mainImage' && key !== 'additionalImages' && key !== 'highlights') {
+        data[key] = value;
+      }
+    }
+    
+    // Process highlights JSON
+    const highlightsJson = formData.get('highlights');
+    if (highlightsJson && typeof highlightsJson === 'string') {
+      data.highlights = JSON.parse(highlightsJson);
+    }
+    
+    // Process main image file only if provided
+    const mainImage = formData.get('mainImage') as File | null;
+    if (mainImage && mainImage.size > 0) {
+      const bytes = await mainImage.arrayBuffer();
+      data.img = Buffer.from(bytes);
+      data.imgType = mainImage.type;
+    }
+    
+    // Process additional images only if provided
+    const additionalImageFiles = formData.getAll('additionalImages') as File[];
+    if (additionalImageFiles.length > 0 && additionalImageFiles[0].size > 0) {
+      data.images = await Promise.all(additionalImageFiles.map(async (file) => {
+        const bytes = await file.arrayBuffer();
+        return {
+          data: Buffer.from(bytes),
+          contentType: file.type
+        };
+      }));
+    }
+
+    // Add updated timestamp
+    data.updatedAt = Date.now();
+    
+    // Update the product
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { $set: data },
+      { new: true, runValidators: true }
+    );
+    
+    return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json(

@@ -231,10 +231,9 @@ export default function ProductsList() {
                   <TableRow key={product._id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
-                        {product.img && (
-                          <div className="h-10 w-10 rounded-md overflow-hidden">
+                        {product.img && (                      <div className="h-10 w-10 rounded-md overflow-hidden">
                             <img 
-                              src={product.img} 
+                              src={`/api/products/${product._id}/image`} 
                               alt={product.name}
                               className="h-full w-full object-cover"
                             />
