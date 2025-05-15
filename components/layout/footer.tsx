@@ -3,8 +3,8 @@ import { Facebook, Instagram, Twitter } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t">
-      <div className="container px-4 py-12 mx-auto">
+<footer className="border-t border-[#121212]/40 bg-gradient-to-t from-[#faedcd] to-[#ffe9e3] text-gray-800">
+<div className="container px-4 py-12 mx-auto">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="text-lg font-serif font-bold mb-4">Gifty</h3>
@@ -99,7 +99,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t mt-12 pt-8">
+        <div className="border-t border-[#121212]/40 mt-12 pt-8">
           <p className="text-sm text-center text-muted-foreground">
             &copy; {new Date().getFullYear()} Gifty. All rights reserved.
           </p>

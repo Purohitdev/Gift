@@ -44,7 +44,7 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen py-12">
+    <main className="min-h-screen py-12  bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">Contact Us</h1>
@@ -52,7 +52,7 @@ export default function ContactPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <Card>
+          <Card className="bg-white/40">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
                 <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -72,7 +72,7 @@ export default function ContactPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/40">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
                 <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -87,7 +87,7 @@ export default function ContactPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/40">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
                 <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -124,6 +124,7 @@ export default function ContactPage() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="John Doe"
+                  className="bg-white/40"
                   required
                 />
               </div>
@@ -137,6 +138,7 @@ export default function ContactPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="john@example.com"
+                  className="bg-white/40"
                   required
                 />
               </div>
@@ -148,6 +150,7 @@ export default function ContactPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
+                  className="bg-white/40"
                   placeholder="How can we help you?"
                   required
                 />
@@ -161,7 +164,8 @@ export default function ContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   placeholder="Your message here..."
-                  className="h-32"
+                  className="h-32 bg-white/40"
+                  
                   required
                 />
               </div>
@@ -176,7 +180,7 @@ export default function ContactPage() {
             </form>
           </div>
 
-          <div className="h-[400px] lg:h-[500px] rounded-lg overflow-hidden shadow-pastel">
+          <div className="h-[400px] lg:h-[500px] rounded-lg overflow-hidden shadow-pastel bg-white/40">
             {/* In a real app, you would embed a Google Map here */}
             <div className="w-full h-full bg-muted flex items-center justify-center">
               <p className="text-muted-foreground">Map Placeholder</p>

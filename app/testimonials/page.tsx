@@ -37,7 +37,7 @@ export default function TestimonialsPage() {
   ]
 
   return (
-    <main className="min-h-screen py-12">
+    <main className="min-h-screen py-12 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">Customer Testimonials</h1>
@@ -48,7 +48,7 @@ export default function TestimonialsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {allTestimonials.map((testimonial) => (
-            <div key={testimonial.id} className="bg-white rounded-lg p-6 shadow-pastel h-full flex flex-col">
+            <div key={testimonial.id} className="bg-white/60 rounded-lg p-6 shadow-pastel h-full flex flex-col">
               <div className="flex items-center mb-4">
                 <div className="relative h-12 w-12 rounded-full overflow-hidden mr-4">
                   <Image

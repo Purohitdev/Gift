@@ -9,7 +9,7 @@ import TrendingProducts from "@/components/home/trending-products"
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
+<main className="min-h-screen bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <HeroSlider />
       <CategoryScroll />
       <FeaturedProducts />

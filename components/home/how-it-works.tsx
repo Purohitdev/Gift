@@ -16,7 +16,7 @@ export default function HowItWorks() {
   }
 
   return (
-    <section className="py-12 md:py-16 bg-white">
+    <section className="py-12 md:py-16">
       <div className="container px-4">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4">How It Works</h2>
@@ -29,7 +29,7 @@ export default function HowItWorks() {
           {howItWorks.map((step, index) => (
             <div key={step.id} className="flex flex-col items-center text-center">
               <div className="relative mb-6">
-                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-pastel-lavender/20 mb-4">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-white/60 mb-4">
                   {getIcon(step.icon)}
                 </div>
                 <div className="absolute top-8 left-full h-0.5 bg-pastel-lavender/50 w-full hidden md:block">

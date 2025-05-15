@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen py-12">
+    <main className="min-h-screen py-12  bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">About Gifty</h1>
@@ -36,7 +36,7 @@ export default function AboutPage() {
         <div className="mb-16">
           <h2 className="text-2xl font-serif font-bold mb-8 text-center">Our Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-pastel-lavender/10">
+            <Card className="bg-white/80">
               <CardContent className="pt-6">
                 <h3 className="text-xl font-serif font-bold mb-2">Quality</h3>
                 <p className="text-muted-foreground">
@@ -45,7 +45,7 @@ export default function AboutPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-pastel-cream/30">
+            <Card className="bg-white/80">
               <CardContent className="pt-6">
                 <h3 className="text-xl font-serif font-bold mb-2">Personalization</h3>
                 <p className="text-muted-foreground">
@@ -54,7 +54,7 @@ export default function AboutPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-pastel-pink/20">
+            <Card className="bg-white/80">
               <CardContent className="pt-6">
                 <h3 className="text-xl font-serif font-bold mb-2">Customer Care</h3>
                 <p className="text-muted-foreground">

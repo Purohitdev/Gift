@@ -215,7 +215,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <main className="min-h-screen py-8">
+    <main className="min-h-screen py-8 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
@@ -589,7 +589,7 @@ export default function ProductsPage() {
                     {products.map((product) => (
                       <div
                         key={product._id}
-                        className="flex flex-col sm:flex-row gap-4 bg-white rounded-lg overflow-hidden shadow-pastel p-4"
+                        className="flex flex-col sm:flex-row gap-4 bg-white/60 rounded-lg overflow-hidden shadow-pastel p-4"
                       >
                         <div className="relative h-48 sm:h-40 sm:w-40 rounded-md overflow-hidden">
                           <img

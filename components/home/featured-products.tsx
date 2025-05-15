@@ -41,7 +41,7 @@ export default function FeaturedProducts() {
             <p className="text-muted-foreground">Our most popular and highly rated gifts</p>
           </div>
           <Link href="/products">
-            <Button variant="outline" className="mt-4 md:mt-0">
+            <Button variant="outline" className="mt-4 md:mt-0 bg-white/40 border-[#12121253]">
               View All Products
             </Button>
           </Link>
@@ -50,15 +50,19 @@ export default function FeaturedProducts() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="rounded-md bg-gray-200 h-64 mb-3"></div>
-                <div className="bg-gray-200 h-5 w-3/4 mb-2 rounded"></div>
-                <div className="bg-gray-200 h-4 w-1/2 mb-3 rounded"></div>
-                <div className="flex justify-between items-center">
-                  <div className="bg-gray-200 h-6 w-1/4 rounded"></div>
-                  <div className="bg-gray-200 h-9 w-1/3 rounded"></div>
-                </div>
-              </div>
+           <div
+           key={i}
+           className="animate-pulse rounded-xl border border-white/20 bg-white/10 backdrop-blur-md shadow-md p-4"
+         >
+           <div className="rounded-md bg-white/80 h-64 mb-3"></div>
+           <div className="bg-white/80 h-5 w-3/4 mb-2 rounded"></div>
+           <div className="bg-white/80 h-4 w-1/2 mb-3 rounded"></div>
+           <div className="flex justify-between items-center">
+             <div className="bg-white/80 h-6 w-1/4 rounded"></div>
+             <div className="bg-white/80 h-9 w-1/3 rounded"></div>
+           </div>
+         </div>
+         
             ))}
           </div>
         ) : (
