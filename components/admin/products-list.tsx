@@ -228,17 +228,21 @@ export default function ProductsList() {
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => (
-                  <TableRow key={product._id}>
-                    <TableCell className="font-medium">
+                  <TableRow key={product._id}>                    <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
-                        {product.img && (                      <div className="h-10 w-10 rounded-md overflow-hidden">
+                        <div className="h-10 w-10 rounded-md overflow-hidden bg-muted">
+                          {product._id && (
                             <img 
-                              src={`/api/products/${product._id}/image`} 
+                              src={`/api/products/${product._id}/image`}
                               alt={product.name}
                               className="h-full w-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/placeholder.svg';
+                              }}
                             />
-                          </div>
-                        )}
+                          )}
+                        </div>
                         <span className="line-clamp-1">
                           {product.name}
                         </span>
