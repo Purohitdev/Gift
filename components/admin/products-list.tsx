@@ -109,7 +109,7 @@ export default function ProductsList() {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "ruppes",
     }).format(price);
   };
 

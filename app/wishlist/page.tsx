@@ -119,11 +119,11 @@ export default function WishlistPage() {
                       <div className="flex items-center gap-2">
                         {item.salePrice ? (
                           <>
-                            <span className="font-bold text-lg">${item.salePrice}</span>
-                            <span className="text-sm text-muted-foreground line-through">${item.price}</span>
+                            <span className="font-bold text-lg">₹{item.salePrice}</span>
+                            <span className="text-sm text-muted-foreground line-through">₹{item.price}</span>
                           </>
                         ) : (
-                          <span className="font-bold text-lg">${item.price}</span>
+                          <span className="font-bold text-lg">₹{item.price}</span>
                         )}
                       </div>
                       <Button

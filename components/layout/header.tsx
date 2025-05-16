@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type React from "react"
+import { UserCircle } from "lucide-react"
 
 import Link from "next/link"
 import { Search, Menu, X } from "lucide-react"
@@ -39,8 +40,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/20 bg-gradient-to-b from-[#fff4f2]/60 to-[#faedcd]/60 backdrop-blur-md shadow-sm">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6">
+      <div className="container flex h-16 items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild className="lg:hidden">
@@ -95,7 +96,7 @@ export default function Header() {
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {/* Desktop Search Bar */}
           <div className="hidden lg:flex items-center">
             {isSearchOpen ? (
@@ -142,11 +143,11 @@ export default function Header() {
 
           {/* Auth Button */}
           {isSignedIn ? (
-            <UserButton />
+            <UserButton afterSignOutUrl="/" />
           ) : (
-            <SignInButton mode="redirect">
-              <Button variant="outline" className="text-sm px-4 py-1.5 border-[#d48a6e] hover:bg-[#faedcd]">
-                Sign In
+            <SignInButton mode="modal">
+              <Button variant="ghost" size="icon" aria-label="Sign In">
+                <UserCircle className="h-8 w-8" />
               </Button>
             </SignInButton>
           )}

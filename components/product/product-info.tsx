@@ -99,10 +99,10 @@ export default function ProductInfo({ product }: { product: any }) {
       <div className="flex items-center gap-2">
         {product.salePrice ? (
           <>
-            <span className="text-2xl md:text-3xl font-bold">${product.salePrice}</span>
-            <span className="text-lg text-muted-foreground line-through">${product.price}</span>
+            <span className="text-2xl md:text-3xl font-bold">₹{product.salePrice}</span>
+            <span className="text-lg text-muted-foreground line-through">₹{product.price}</span>
             <span className="bg-accent text-accent-foreground text-sm px-2 py-0.5 rounded-md">
-              Save ${(product.price - product.salePrice).toFixed(2)}
+              Save ₹{(product.price - product.salePrice).toFixed(2)}
             </span>
           </>
         ) : (

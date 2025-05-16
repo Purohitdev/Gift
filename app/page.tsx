@@ -3,9 +3,11 @@ import CategoryScroll from "@/components/home/category-scroll"
 import FeaturedProducts from "@/components/home/featured-products"
 import TestimonialsCarousel from "@/components/home/testimonials-carousel"
 import HowItWorks from "@/components/home/how-it-works"
-import InstagramFeed from "@/components/home/instagram-feed"
+// import InstagramFeed from "@/components/home/instagram-feed"
 import WhatsappButton from "@/components/layout/whatsapp-button"
 import TrendingProducts from "@/components/home/trending-products"
+import FaqSection from "@/components/product/faq-section"
+import SupportSection from "@/components/home/SupportSection"
 
 export default function HomePage() {
   return (
@@ -15,8 +17,13 @@ export default function HomePage() {
       <FeaturedProducts />
       <TrendingProducts />
       <TestimonialsCarousel />
+            <FaqSection/>
+           
+
       <HowItWorks />
-      <InstagramFeed />
+       <SupportSection/>
+      {/* <InstagramFeed /> */}
+
       <WhatsappButton />
     </main>
   )

@@ -191,11 +191,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center gap-2">
             {product.salePrice ? (
               <>
-                <span className="font-bold text-lg">${product.salePrice}</span>
-                <span className="text-sm text-muted-foreground line-through">${product.price}</span>
+                <span className="font-bold text-lg">₹{product.salePrice}</span>
+                <span className="text-sm text-muted-foreground line-through">₹{product.price}</span>
               </>
             ) : (
-              <span className="font-bold text-lg">${product.price}</span>
+              <span className="font-bold text-lg">₹{product.price}</span>
             )}
           </div>
         </div>

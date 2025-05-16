@@ -250,7 +250,7 @@ export default function OrdersPage() {
                                       <p className="text-sm text-muted-foreground">{item.options}</p>
                                     }
                                     <div className="flex items-center text-sm mt-1">
-                                      <span>${(item.salePrice || item.price).toFixed(2)} × {item.quantity}</span>
+                                      <span>₹{(item.salePrice || item.price).toFixed(2)} × {item.quantity}</span>
                                     </div>
                                   </div>
                                 </div>
