@@ -8,7 +8,7 @@ export default function PrivacyPage() {
 
           <div className="prose prose-sm sm:prose max-w-none">
             <p>
-              At Gifty, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and
+              At lovingcraft, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and
               safeguard your information when you visit our website or make a purchase.
             </p>
 
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
             <h2>Contact Us</h2>
             <p>If you have any questions about this Privacy Policy, please contact us at:</p>
             <p>
-              Email: privacy@gifty.com
+              Email: privacy@lovingcraft.com
               <br />
               Phone: +1 (555) 123-4567
               <br />

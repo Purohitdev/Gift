@@ -1,32 +1,33 @@
-
-
 "use client"
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, ZoomIn, Play, Pause } from "lucide-react"
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 type Product = {
   _id: string
   name: string
   img?: string
-  images?: { data: Buffer, contentType: string }[]
+  images?: { data: Buffer; contentType: string }[]
 }
 
 export default function ProductGallery({ product }: { product: Product }) {
   const [currentImage, setCurrentImage] = useState(0)
   const [isAutoplay, setIsAutoplay] = useState(true)
+  const [zoomLevel, setZoomLevel] = useState(1)
+
+  const MAX_ZOOM = 4
+  const MIN_ZOOM = 1
+
   const images: string[] = []
-  
-  // Add main image
+
   if (product._id) {
     images.push(`/api/products/${product._id}/image`)
   } else {
-    images.push('/placeholder.svg')
+    images.push("/placeholder.svg")
   }
-  
-  // Add additional images
+
   if (product._id && product.images?.length) {
     for (let i = 0; i < product.images.length; i++) {
       images.push(`/api/products/${product._id}/images/${i}`)
@@ -42,20 +43,29 @@ export default function ProductGallery({ product }: { product: Product }) {
   }
 
   useEffect(() => {
-    if (!isAutoplay) return
+    if (!isAutoplay || zoomLevel > 1) return
 
     const interval = setInterval(nextImage, 3000)
     return () => clearInterval(interval)
-  }, [isAutoplay])
+  }, [isAutoplay, zoomLevel])
+
+  useEffect(() => {
+    setZoomLevel(1)
+  }, [currentImage])
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+      <div
+        className={`relative aspect-square overflow-hidden rounded-lg bg-muted cursor-${
+          zoomLevel === 1 ? "zoom-in" : "zoom-out"
+        }`}
+      >
         <Image
           src={images[currentImage]}
           alt={product.name}
           fill
-          className="object-cover transition-opacity duration-300"
+          className="object-cover transition-transform duration-500 ease-in-out"
+          style={{ transform: `scale(${zoomLevel})` }}
           priority
         />
 
@@ -65,10 +75,10 @@ export default function ProductGallery({ product }: { product: Product }) {
           className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 text-foreground hover:bg-white/90"
           onClick={(e) => {
             e.preventDefault()
-            prevImage()
-            setIsAutoplay(false)
+            if (zoomLevel === MIN_ZOOM) prevImage()
           }}
           aria-label="Previous image"
+          disabled={zoomLevel !== MIN_ZOOM}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -79,10 +89,10 @@ export default function ProductGallery({ product }: { product: Product }) {
           className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 text-foreground hover:bg-white/90"
           onClick={(e) => {
             e.preventDefault()
-            nextImage()
-            setIsAutoplay(false)
+            if (zoomLevel === MIN_ZOOM) nextImage()
           }}
           aria-label="Next image"
+          disabled={zoomLevel !== MIN_ZOOM}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -94,19 +104,43 @@ export default function ProductGallery({ product }: { product: Product }) {
             className="h-8 w-8 rounded-full bg-white/80 text-foreground hover:bg-white/90"
             onClick={(e) => {
               e.preventDefault()
-              setIsAutoplay(!isAutoplay)
+              if (zoomLevel === MIN_ZOOM) setIsAutoplay(!isAutoplay)
             }}
             aria-label={isAutoplay ? "Pause slideshow" : "Play slideshow"}
+            disabled={zoomLevel !== MIN_ZOOM}
           >
             {isAutoplay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
         </div>
 
+        {/* Zoom Out Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-12 bottom-2 h-8 w-8 rounded-full bg-white/80 text-foreground hover:bg-white/90"
+          aria-label="Zoom out"
+          onClick={(e) => {
+            e.preventDefault()
+            setIsAutoplay(false)
+            setZoomLevel((prev) => (prev === MIN_ZOOM ? MIN_ZOOM : prev - 1))
+          }}
+          disabled={zoomLevel === MIN_ZOOM}
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+
+        {/* Zoom In Button */}
         <Button
           variant="ghost"
           size="icon"
           className="absolute right-2 bottom-2 h-8 w-8 rounded-full bg-white/80 text-foreground hover:bg-white/90"
           aria-label="Zoom in"
+          onClick={(e) => {
+            e.preventDefault()
+            setIsAutoplay(false)
+            setZoomLevel((prev) => (prev === MAX_ZOOM ? MAX_ZOOM : prev + 1))
+          }}
+          disabled={zoomLevel === MAX_ZOOM}
         >
           <ZoomIn className="h-4 w-4" />
         </Button>
@@ -120,10 +154,13 @@ export default function ProductGallery({ product }: { product: Product }) {
               }`}
               onClick={(e) => {
                 e.preventDefault()
-                setCurrentImage(index)
-                setIsAutoplay(false)
+                if (zoomLevel === MIN_ZOOM) {
+                  setCurrentImage(index)
+                  setIsAutoplay(false)
+                }
               }}
               aria-label={`Go to image ${index + 1}`}
+              disabled={zoomLevel !== MIN_ZOOM}
             />
           ))}
         </div>
@@ -137,16 +174,14 @@ export default function ProductGallery({ product }: { product: Product }) {
               currentImage === index ? "ring-2 ring-primary" : "ring-1 ring-border"
             }`}
             onClick={() => {
-              setCurrentImage(index)
-              setIsAutoplay(false)
+              if (zoomLevel === MIN_ZOOM) {
+                setCurrentImage(index)
+                setIsAutoplay(false)
+              }
             }}
+            disabled={zoomLevel !== MIN_ZOOM}
           >
-            <Image
-              src={image}
-              alt={`Product thumbnail ${index + 1}`}
-              fill
-              className="object-cover"
-            />
+            <Image src={image} alt={`Product thumbnail ${index + 1}`} fill className="object-cover" />
           </button>
         ))}
       </div>

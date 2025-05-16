@@ -173,9 +173,9 @@ const InvoicePDF = ({ order }: { order: OrderProps }) => {
             <View key={index} style={styles.row}>
               <Text style={styles.description}>{item.name}</Text>
               <Text style={styles.qty}>{item.quantity}</Text>
-              <Text style={styles.price}>${(item.salePrice || item.price).toFixed(2)}</Text>
+              <Text style={styles.price}>₹{(item.salePrice || item.price).toFixed(2)}</Text>
               <Text style={styles.amount}>
-                ${((item.salePrice || item.price) * item.quantity).toFixed(2)}
+                ₹{((item.salePrice || item.price) * item.quantity).toFixed(2)}
               </Text>
             </View>
           ))}
@@ -184,14 +184,14 @@ const InvoicePDF = ({ order }: { order: OrderProps }) => {
             <Text style={styles.description}></Text>
             <Text style={styles.qty}></Text>
             <Text style={styles.price}>Subtotal:</Text>
-            <Text style={styles.amount}>${order.subtotal.toFixed(2)}</Text>
+            <Text style={styles.amount}>₹{order.subtotal.toFixed(2)}</Text>
           </View>
           
           <View style={styles.row}>
             <Text style={styles.description}></Text>
             <Text style={styles.qty}></Text>
             <Text style={styles.price}>Shipping:</Text>
-            <Text style={styles.amount}>${order.shipping.toFixed(2)}</Text>
+            <Text style={styles.amount}>₹{order.shipping.toFixed(2)}</Text>
           </View>
           
           <View style={styles.row}>
@@ -205,7 +205,7 @@ const InvoicePDF = ({ order }: { order: OrderProps }) => {
             <Text style={styles.description}></Text>
             <Text style={styles.qty}></Text>
             <Text style={styles.price}>Total:</Text>
-            <Text style={styles.amount}>${order.total.toFixed(2)}</Text>
+            <Text style={styles.amount}>₹{order.total.toFixed(2)}</Text>
           </View>
         </View>
         
@@ -301,29 +301,29 @@ export default function InvoiceComponent({ order }: { order: OrderProps }) {
                     <tr>
                       <td>${item.name}</td>
                       <td>${item.quantity}</td>
-                      <td class="text-right">$${(item.salePrice || item.price).toFixed(2)}</td>
-                      <td class="text-right">$${((item.salePrice || item.price) * item.quantity).toFixed(2)}</td>
+                      <td class="text-right">₹${(item.salePrice || item.price).toFixed(2)}</td>
+                      <td class="text-right">₹${((item.salePrice || item.price) * item.quantity).toFixed(2)}</td>
                     </tr>
                   `).join('')}
                   <tr>
                     <td colspan="2"></td>
                     <td class="text-right">Subtotal:</td>
-                    <td class="text-right">$${order.subtotal.toFixed(2)}</td>
+                    <td class="text-right">₹${order.subtotal.toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td colspan="2"></td>
                     <td class="text-right">Shipping:</td>
-                    <td class="text-right">$${order.shipping.toFixed(2)}</td>
+                    <td class="text-right">₹${order.shipping.toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td colspan="2"></td>
                     <td class="text-right">Tax:</td>
-                    <td class="text-right">$${order.tax.toFixed(2)}</td>
+                    <td class="text-right">₹${order.tax.toFixed(2)}</td>
                   </tr>
                   <tr class="total-row">
                     <td colspan="2"></td>
                     <td class="text-right">Total:</td>
-                    <td class="text-right">$${order.total.toFixed(2)}</td>
+                    <td class="text-right">₹${order.total.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>

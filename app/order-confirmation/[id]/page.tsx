@@ -207,9 +207,9 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
                           {item.options && <p className="text-sm text-muted-foreground">{item.options}</p>}
                           <div className="flex items-center justify-between mt-1">
                             <p className="text-sm">
-                              ${(item.salePrice || item.price).toFixed(2)} × {item.quantity}
+                              ₹{(item.salePrice || item.price).toFixed(2)} × {item.quantity}
                             </p>
-                            <p className="font-medium">${((item.salePrice || item.price) * item.quantity).toFixed(2)}</p>
+                            <p className="font-medium">₹{((item.salePrice || item.price) * item.quantity).toFixed(2)}</p>
                           </div>
                         </div>
                       </div>

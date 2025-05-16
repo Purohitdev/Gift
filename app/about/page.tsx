@@ -6,7 +6,7 @@ export default function AboutPage() {
     <main className="min-h-screen py-12  bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">About Gifty</h1>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">About lovingcraft</h1>
           <p className="text-muted-foreground">Creating personalized gifts with love and care since 2015</p>
         </div>
 
@@ -14,12 +14,12 @@ export default function AboutPage() {
           <div>
             <h2 className="text-2xl font-serif font-bold mb-4">Our Story</h2>
             <p className="text-muted-foreground mb-4">
-              Gifty began with a simple idea: to help people create meaningful, personalized gifts for their loved ones.
+              lovingcraft began with a simple idea: to help people create meaningful, personalized gifts for their loved ones.
               What started as a small workshop in a garage has grown into a beloved brand trusted by thousands of
               customers worldwide.
             </p>
             <p className="text-muted-foreground mb-4">
-              Our founder, Sarah Johnson, was inspired to start Gifty after struggling to find a meaningful gift for her
+              Our founder, Sarah Johnson, was inspired to start lovingcraft after struggling to find a meaningful gift for her
               parents' anniversary. She created a custom photo frame that told their love story, and the joy it brought
               them sparked the beginning of our journey.
             </p>

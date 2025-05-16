@@ -25,7 +25,7 @@ export default function TestimonialsPage() {
       name: "Lisa Thompson",
       avatar: "/placeholder.svg?height=100&width=100",
       rating: 5,
-      text: "I've ordered multiple gifts from Gifty and have always been impressed with the quality and attention to detail. Their customer service is also top-notch!",
+      text: "I've ordered multiple gifts from lovingcraft and have always been impressed with the quality and attention to detail. Their customer service is also top-notch!",
     },
     {
       id: 8,
@@ -80,7 +80,7 @@ export default function TestimonialsPage() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-serif font-bold mb-6">Share Your Experience</h2>
           <p className="text-muted-foreground mb-6">
-            We'd love to hear about your experience with Gifty. Your feedback helps us improve and serves as a guide for
+            We'd love to hear about your experience with lovingcraft. Your feedback helps us improve and serves as a guide for
             future customers.
           </p>
           <div className="bg-pastel-lavender/10 rounded-lg p-6 text-center">

@@ -27,7 +27,7 @@ const playfair = Playfair_Display({
 
 // Static site metadata
 export const metadata: Metadata = {
-  title: "Gifty - Personalized Gift Shop",
+  title: "lovingcraft - Personalized Gift Shop",
   description: "Find the perfect personalized gift for your loved ones",
 }
 

@@ -292,8 +292,8 @@ export default function ProductsPage() {
                         }}
                       />
                       <div className="flex justify-between mt-2">
-                        <span>${priceRange[0]}</span>
-                        <span>${priceRange[1]}</span>
+                        <span>₹{priceRange[0]}</span>
+                        <span>₹{priceRange[1]}</span>
                       </div>
                     </div>
                   </div>
@@ -408,7 +408,7 @@ export default function ProductsPage() {
 
             {priceRange[0] > 0 || priceRange[1] < maxPrice ? (
               <Badge variant="secondary" className="flex items-center gap-1">
-                Price: ${priceRange[0]} - ${priceRange[1]}
+                Price: ₹{priceRange[0]} - ₹{priceRange[1]}
                 <Button variant="ghost" size="icon" className="h-4 w-4 p-0 ml-1" onClick={() => removeFilter("price")}>
                   <X className="h-3 w-3" />
                 </Button>
@@ -496,8 +496,8 @@ export default function ProductsPage() {
                         }}
                       />
                       <div className="flex justify-between mt-2 text-sm">
-                        <span>${priceRange[0]}</span>
-                        <span>${priceRange[1]}</span>
+                        <span>₹{priceRange[0]}</span>
+                        <span>₹{priceRange[1]}</span>
                       </div>
                     </div>
                   </div>
@@ -631,11 +631,11 @@ export default function ProductsPage() {
                             <div className="flex items-center gap-2">
                               {product.salePrice ? (
                                 <>
-                                  <span className="font-bold text-lg">${product.salePrice}</span>
-                                  <span className="text-sm text-muted-foreground line-through">${product.price}</span>
+                                  <span className="font-bold text-lg">₹{product.salePrice}</span>
+                                  <span className="text-sm text-muted-foreground line-through">₹{product.price}</span>
                                 </>
                               ) : (
-                                <span className="font-bold text-lg">${product.price}</span>
+                                <span className="font-bold text-lg">₹{product.price}</span>
                               )}
                             </div>
                             <div className="flex gap-2">

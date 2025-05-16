@@ -75,7 +75,7 @@ export default function CartPage() {
 
                         <div className="col-span-2 text-center mb-4 md:mb-0">
                           <div className="md:hidden text-sm text-muted-foreground mb-1">Price:</div>
-                          <div>${(item.salePrice || item.price).toFixed(2)}</div>
+                          <div>₹{(item.salePrice || item.price).toFixed(2)}</div>
                         </div>
 
                         <div className="col-span-2 flex justify-center mb-4 md:mb-0">
@@ -107,7 +107,7 @@ export default function CartPage() {
                         <div className="col-span-2 text-right mb-4 md:mb-0 flex md:block items-center justify-between">
                           <div className="md:hidden text-sm text-muted-foreground">Total:</div>
                           <div className="font-medium">
-                            ${((item.salePrice || item.price) * item.quantity).toFixed(2)}
+                            ₹{((item.salePrice || item.price) * item.quantity).toFixed(2)}
                           </div>
                           <button
                             className="text-muted-foreground hover:text-red-500 hidden md:inline-flex"

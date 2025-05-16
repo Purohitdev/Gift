@@ -11,7 +11,7 @@ export default function InstagramFeed() {
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4">Follow Us on Instagram</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            @gifty_shop • See how our customers style their personalized gifts
+            @lovingcraft • See how our customers style their personalized gifts
           </p>
         </div>
 
