@@ -37,9 +37,10 @@ export default function HeroSlider() {
               src={slide.image || "/placeholder.svg"}
               alt={slide.title}
               fill
-              className="object-cover"
+              className="object-cover object-bottom"
               priority={slide.id === 1}
             />
+
             <div className="absolute inset-0 bg-black/30" />
             <div className="absolute inset-0 flex flex-col justify-center items-start p-6 md:p-12 lg:p-24">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white mb-4 max-w-2xl">

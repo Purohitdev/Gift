@@ -61,11 +61,8 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium mb-1">Our Location</h3>
                   <p className="text-sm text-muted-foreground">
-                    123 Gift Street
-                    <br />
-                    Craftville, CV 12345
-                    <br />
-                    United States
+                    Jaipur
+                    
                   </p>
                 </div>
               </div>
@@ -80,8 +77,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">Phone & Email</h3>
-                  <p className="text-sm text-muted-foreground mb-1">+1 (555) 123-4567</p>
-                  <p className="text-sm text-muted-foreground">hello@gifty.com</p>
+                  <p className="text-sm text-muted-foreground mb-1">123456789</p>
+                  <p className="text-sm text-muted-foreground">xyz@gmail.com</p>
                 </div>
               </div>
             </CardContent>
@@ -98,8 +95,6 @@ export default function ContactPage() {
                   <p className="text-sm text-muted-foreground mb-1">Monday - Friday: 9am - 6pm</p>
                   <p className="text-sm text-muted-foreground">
                     Saturday: 10am - 4pm
-                    <br />
-                    Sunday: Closed
                   </p>
                 </div>
               </div>
