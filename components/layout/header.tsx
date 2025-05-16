@@ -74,7 +74,7 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-serif font-bold tracking-wide">Gifty</span>
+            <span className="text-xl font-serif font-bold tracking-wide">lovingcraft</span>
           </Link>
 
           {/* Desktop Nav */}
