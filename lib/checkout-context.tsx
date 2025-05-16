@@ -10,6 +10,7 @@ type ShippingAddress = {
   fullName: string
   email: string
   phone: string
+  whatsappNumber: string
   address: string
   city: string
   state: string
@@ -54,12 +55,12 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast()
   const { items, subtotal, total, shipping, tax, clearCart } = useCart()
   const [isProcessingOrder, setIsProcessingOrder] = useState(false)
-  
-  // State for shipping address and payment details
+    // State for shipping address and payment details
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     fullName: "",
     email: "",
     phone: "",
+    whatsappNumber: "",
     address: "",
     city: "",
     state: "",
@@ -106,15 +107,15 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
           salePrice: item.salePrice,
           image: item.image,
           options: item.options
-        })),
-        shippingAddress: {
+        })),        shippingAddress: {
           fullName: shippingAddress.fullName,
           address: shippingAddress.address,
           city: shippingAddress.city,
           state: shippingAddress.state,
           zipCode: shippingAddress.zipCode,
           country: shippingAddress.country,
-          phone: shippingAddress.phone
+          phone: shippingAddress.phone,
+          whatsappNumber: shippingAddress.whatsappNumber
         },
         paymentMethod: paymentDetails.method,
         subtotal,
@@ -207,14 +208,14 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
       paymentMethod: paymentDetails.method
     }
   }
-  
-  // Validate form data
+    // Validate form data
   const validateFormData = () => {
     // Check if shipping address is complete
     if (
       !shippingAddress.fullName ||
       !shippingAddress.email ||
       !shippingAddress.phone ||
+      !shippingAddress.whatsappNumber ||
       !shippingAddress.address ||
       !shippingAddress.city ||
       !shippingAddress.state ||
