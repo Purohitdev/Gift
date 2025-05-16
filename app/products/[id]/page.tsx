@@ -5,7 +5,7 @@ import { useParams } from "next/navigation"
 import ProductGallery from "@/components/product/product-gallery"
 import ProductInfo from "@/components/product/product-info"
 import ProductHighlights from "@/components/product/product-highlights"
-import SampleWorks from "@/components/product/sample-works"
+// import SampleWorks from "@/components/product/sample-works"
 import FaqSection from "@/components/product/faq-section"
 import FomoPopup from "@/components/product/fomo-popup"
 import RelatedProducts from "@/components/product/related-products"
@@ -102,10 +102,11 @@ export default function ProductDetailPage() {
         </div>
 
         <ProductHighlights highlights={product.highlights} />
-        <SampleWorks />
+        {/* <SampleWorks /> */}
+              <RelatedProducts currentProductId={productId} />
+
         <FaqSection />
       </div>
-      <RelatedProducts currentProductId={productId} />
       <FomoPopup />
     </main>
   )
