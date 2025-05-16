@@ -109,7 +109,7 @@ export default function ProductsList() {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "ruppes",
+      currency: "INR",
     }).format(price);
   };
 
@@ -228,7 +228,8 @@ export default function ProductsList() {
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => (
-                  <TableRow key={product._id}>                    <TableCell className="font-medium">
+                  <TableRow key={product._id}>
+                    <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-md overflow-hidden bg-muted">
                           {product._id && (
