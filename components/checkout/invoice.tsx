@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -218,8 +217,6 @@ const InvoicePDF = ({ order }: { order: OrderProps }) => {
 }
 
 export default function InvoiceComponent({ order }: { order: OrderProps }) {
-  // Removed unused state
-  
   // Handle print functionality
   const handlePrint = () => {
     const printWindow = window.open('', '_blank')
