@@ -8,8 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductsList from "@/components/admin/products-list";
 import { PlusCircle } from "lucide-react";
 
-// Simple Dialog component (replace with your own if needed)
-// Improved Dialog component with animations and better styling
 function Dialog({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
   if (!open) return null;
   return (
