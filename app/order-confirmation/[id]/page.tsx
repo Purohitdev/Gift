@@ -304,8 +304,8 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
               </CardContent>
             </Card>
             
-            {/* Show invoice component only when payment is successful */}
-            {order.paymentStatus === "paid" && (
+            {/* Invoice Component */}
+            {order && ( // Render if order data is available
               <InvoiceComponent order={order} />
             )}
           </div>

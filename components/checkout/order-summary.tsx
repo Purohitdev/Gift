@@ -12,11 +12,28 @@ import { Loader2 } from "lucide-react"
 
 export default function OrderSummary() {
   const { items, subtotal } = useCart()
-  const { placeOrder, isProcessingOrder } = useCheckout()
+  const { placeOrder, isProcessingOrder, shippingAddress } = useCheckout()
 
   const shipping = 4.99
   const tax = subtotal * 0.08
   const total = subtotal + shipping + tax
+  
+  // Format delivery address for display
+  const formattedAddress = shippingAddress.address && shippingAddress.city ? (
+    <div className="text-sm space-y-1 my-3 text-muted-foreground">
+      <div>{shippingAddress.fullName}</div>
+      <div>{shippingAddress.address}</div>
+      <div>{shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}</div>
+      <div>Phone: {shippingAddress.phone}</div>
+      {shippingAddress.whatsappNumber && (
+        <div>WhatsApp: {shippingAddress.whatsappNumber}</div>
+      )}
+    </div>
+  ) : (
+    <p className="text-sm text-muted-foreground italic my-2">
+      Please complete delivery information
+    </p>
+  )
 
   return (
     <Card>
@@ -43,6 +60,13 @@ export default function OrderSummary() {
           </div>
         ))}
 
+        <Separator className="my-4" />
+        
+        <div>
+          <h4 className="font-medium mb-1">Delivery Information</h4>
+          {formattedAddress}
+        </div>
+        
         <Separator className="my-4" />
 
         <div className="space-y-1.5">

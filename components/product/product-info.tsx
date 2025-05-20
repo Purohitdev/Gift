@@ -12,6 +12,10 @@ import { useCart } from "@/lib/cart-context"
 import { useWishlist } from "@/lib/wishlist-context"
 import CountdownTimer from "@/components/product/countdown-timer"
 
+interface CountdownTimerProps {
+  saleEndDate: string;
+}
+
 export default function ProductInfo({ product }: { product: any }) {
   const { toast } = useToast()
   const { addItem } = useCart()
@@ -26,11 +30,10 @@ export default function ProductInfo({ product }: { product: any }) {
   const inWishlist = isInWishlist(product.id)
 
   const handleAddToCart = () => {
-    // Check if the WhatsApp number is provided
-    if (!whatsappNumber) {
+    if (!whatsappNumber.trim()) {
       toast({
         title: "WhatsApp number required",
-        description: "Please enter your WhatsApp number to continue.",
+        description: "Please enter your WhatsApp number for design proofs.",
         variant: "destructive",
       })
       return
@@ -38,18 +41,41 @@ export default function ProductInfo({ product }: { product: any }) {
 
     setIsAddingToCart(true)
 
-    const options = `Size: ${frameSize === "small" ? 'Small (8" x 10")' : frameSize === "medium" ? 'Medium (11" x 14")' : 'Large (16" x 20")'}, Faces: ${faces}, Delivery: ${delivery}`
+    const frameSizeDisplay = frameSize === "small" ? 'Small (8" x 10")' : frameSize === "medium" ? 'Medium (11" x 14")' : 'Large (16" x 20")';
+    const deliveryDisplay = delivery === "standard" ? "Standard (7-10 days)" : delivery === "express" ? "Express (3-5 days) +$9.99" : "Rush (1-2 days) +$19.99";
 
-    // Directly add item to cart (without delay)
+    // Updated options string to include all relevant details, including the product-specific WhatsApp number
+    const options = `Size: ${frameSizeDisplay}, Faces: ${faces}, Delivery: ${deliveryDisplay}, WhatsApp (for proofs): ${whatsappNumber.trim()}`
+
+    const productIdString = String(product.id || product._id || ''); // Added product._id as a fallback
+    const productNameString = String(product.name || 'Unnamed Product');
+    const productImageString = (typeof product.image === 'string' && product.image.trim() !== '') ? product.image : '/placeholder.svg';
+    const productPriceNumber = Number(product.price || 0);
+    const productSalePriceNumber = product.salePrice != null ? Number(product.salePrice) : null;
+
+    if (!productIdString) {
+      toast({
+        title: "Cannot Add to Cart",
+        description: "Product information is incomplete (missing ID). Please try again or contact support.",
+        variant: "destructive",
+      });
+      setIsAddingToCart(false);
+      return;
+    }
+    
+    if (productImageString === '/placeholder.svg' && !(typeof product.image === 'string' && product.image.trim() !== '')) {
+      console.warn(`Product "${productNameString}" (ID: ${productIdString}) is missing an image. Using placeholder.`);
+    }
+
     addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      salePrice: product.salePrice,
-      image: product.image,
+      id: productIdString,
+      name: productNameString,
+      price: productPriceNumber,
+      salePrice: productSalePriceNumber,
+      image: productImageString, // Ensured this is always a string
       quantity,
-      options,
-    })
+      options, 
+    });
 
     toast({
       title: "Added to cart",
@@ -67,7 +93,7 @@ export default function ProductInfo({ product }: { product: any }) {
         description: `${product.name} has been removed from your wishlist.`,
       })
     } else {
-      addToWishlist(product)
+      addToWishlist(product) // Assuming product object is suitable for wishlist
       toast({
         title: "Added to wishlist",
         description: `${product.name} has been added to your wishlist.`,
@@ -85,19 +111,19 @@ export default function ProductInfo({ product }: { product: any }) {
               <Star
                 key={i}
                 className={`h-4 w-4 ${
-                  i < Math.floor(product.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                  i < Math.floor(product.rating || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
                 }`}
               />
             ))}
           </div>
           <span className="text-sm text-muted-foreground ">
-            {product.rating} ({product.reviewCount} reviews)
+            {product.rating || 0} ({product.reviewCount || 0} reviews)
           </span>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        {product.salePrice ? (
+        {product.salePrice && product.salePrice < product.price ? (
           <>
             <span className="text-2xl md:text-3xl font-bold">₹{product.salePrice}</span>
             <span className="text-lg text-muted-foreground line-through">₹{product.price}</span>
@@ -106,16 +132,19 @@ export default function ProductInfo({ product }: { product: any }) {
             </span>
           </>
         ) : (
-          <span className="text-2xl md:text-3xl font-bold">${product.price}</span>
+          <span className="text-2xl md:text-3xl font-bold">₹{product.price}</span>
         )}
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Clock className="h-4 w-4" />
-        <span>Limited time offer! Sale ends in:</span>
-      </div>
-
-      <CountdownTimer />
+      {product.saleEndDate && (
+        <>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span>Limited time offer! Sale ends in:</span>
+          </div>
+          <CountdownTimer />
+        </>
+      )}
 
       <div className="space-y-4 pt-4 border-t">
         <div className="space-y-2">
@@ -172,7 +201,7 @@ export default function ProductInfo({ product }: { product: any }) {
 
         <div className="space-y-2">
           <Label htmlFor="whatsapp" className="flex items-center gap-1">
-            WhatsApp Number <span className="text-red-500">*</span>
+            WhatsApp Number (for design proofs) <span className="text-red-500">*</span>
           </Label>
           <div className="flex">
             <Input
@@ -185,7 +214,7 @@ export default function ProductInfo({ product }: { product: any }) {
               className="flex-1 bg-white/40"
             />
           </div>
-          <p className="text-xs text-muted-foreground">We'll send you design proofs and updates via WhatsApp</p>
+          <p className="text-xs text-muted-foreground">We'll send you design proofs and updates via WhatsApp for this item.</p>
         </div>
 
         <div className="space-y-2">
@@ -206,8 +235,8 @@ export default function ProductInfo({ product }: { product: any }) {
               type="number"
               min="1"
               value={quantity}
-              onChange={(e) => setQuantity(Number.parseInt(e.target.value) || 1)}
-              className="w-16 text-center"
+              onChange={(e) => setQuantity(Math.max(1, Number.parseInt(e.target.value) || 1))}
+              className="w-16 text-center bg-white/40"
             />
             <Button
               type="button"
@@ -250,14 +279,25 @@ export default function ProductInfo({ product }: { product: any }) {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-md">
-        <Check className="h-4 w-4" />
-        <span>In stock - Ready to ship within 24 hours</span>
-      </div>
+      {product.stock > 0 ? (
+         <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-md">
+           <Check className="h-4 w-4" />
+           <span>In stock - Ready to ship within 24 hours</span>
+         </div>
+      ) : (
+        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          <Clock className="h-4 w-4" />
+          <span>Out of stock</span>
+        </div>
+      )}
+
 
       <Button
         className="w-full gap-2 bg-green-500 hover:bg-green-600 text-white"
-        onClick={() => window.open(`https://wa.me/1234567890?text=I'm interested in ${product.name}`, "_blank")}
+        onClick={() => {
+          const message = encodeURIComponent(`I'm interested in the product: ${product.name} (ID: ${product.id}). Please provide more details.`);
+          window.open(`https://wa.me/${process.env.NEXT_PUBLIC_SHOP_WHATSAPP_NUMBER || 'YOUR_DEFAULT_WHATSAPP_NUMBER_HERE'}?text=${message}`, "_blank");
+        }}
       >
         <MessageCircle className="h-4 w-4" />
         Shop on WhatsApp
@@ -268,7 +308,7 @@ export default function ProductInfo({ product }: { product: any }) {
           <Share2 className="h-4 w-4" />
           Share
         </Button>
-        <span className="text-sm text-muted-foreground">SKU: {product.id ? product.id.toString().padStart(6, "0") : "000000"}</span>
+        <span className="text-sm text-muted-foreground">SKU: {product.sku || (product.id ? product.id.toString().padStart(6, "0") : "000000")}</span>
       </div>
     </div>
   )

@@ -1,30 +1,26 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode } from "react"
+import { createContext, useContext, useState, ReactNode, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
-import { useCart } from "./cart-context"
+import { useCart } from "./cart-context" // Assuming CartItem has an 'options' field
 
 // Define the types for our context
 type ShippingAddress = {
   fullName: string
   email: string
   phone: string
+  whatsappNumber: string // Retained as per user's previous setup
   address: string
   city: string
   state: string
   zipCode: string
   country: string
-  addressType: string
   deliveryNotes?: string
 }
 
 type PaymentDetails = {
-  method: "online" | "cod"
-  cardNumber?: string
-  expiry?: string
-  cvv?: string
-  nameOnCard?: string
+  method: "cod" | "online_mock" // Simplified payment methods
 }
 
 type CheckoutContextType = {
@@ -34,6 +30,7 @@ type CheckoutContextType = {
   updatePaymentDetails: (data: Partial<PaymentDetails>) => void
   isProcessingOrder: boolean
   placeOrder: () => Promise<void>
+  errors: Partial<Record<keyof ShippingAddress | 'payment', string>>
 }
 
 // Create the context with a default value
@@ -54,67 +51,106 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast()
   const { items, subtotal, total, shipping, tax, clearCart } = useCart()
   const [isProcessingOrder, setIsProcessingOrder] = useState(false)
-  
-  // State for shipping address and payment details
+  const [errors, setErrors] = useState<Partial<Record<keyof ShippingAddress | 'payment', string>>>({})
+
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     fullName: "",
     email: "",
     phone: "",
+    whatsappNumber: "",
     address: "",
     city: "",
     state: "",
     zipCode: "",
-    country: "us",
-    addressType: "home",
+    country: "US", // Default country
+    deliveryNotes: "",
   })
-  
+
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
-    method: "online",
-    cardNumber: "",
-    expiry: "",
-    cvv: "",
-    nameOnCard: "",
+    method: "cod", // Default to Cash on Delivery
   })
-  
+
   // Function to update shipping address
-  const updateShippingAddress = (data: Partial<ShippingAddress>) => {
-    setShippingAddress(prev => ({ ...prev, ...data }))
-  }
-  
+  const updateShippingAddress = useCallback(
+    (data: Partial<ShippingAddress>) => {
+      setShippingAddress(prev => ({ ...prev, ...data }))
+      // Clear errors for fields being updated
+      if (Object.keys(data).some(key => errors[key as keyof ShippingAddress])) {
+        setErrors(prevErrors => {
+          const newErrors = { ...prevErrors };
+          Object.keys(data).forEach(key => delete newErrors[key as keyof ShippingAddress]);
+          return newErrors;
+        });
+      }
+    },
+    [errors] // Add errors to dependency array
+  )
+
   // Function to update payment details
-  const updatePaymentDetails = (data: Partial<PaymentDetails>) => {
-    setPaymentDetails(prev => ({ ...prev, ...data }))
+  const updatePaymentDetails = useCallback(
+    (data: Partial<PaymentDetails>) => {
+      setPaymentDetails(prev => ({ ...prev, ...data }))
+    },
+    []
+  )
+
+  // Validate form data
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof ShippingAddress | 'payment', string>> = {};
+    if (!shippingAddress.fullName.trim()) newErrors.fullName = "Full name is required";
+    if (!shippingAddress.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\\S+@\\S+\\.\\S+/.test(shippingAddress.email)) {
+      newErrors.email = "Email is invalid";
+    }
+    if (!shippingAddress.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!shippingAddress.whatsappNumber.trim()) newErrors.whatsappNumber = "WhatsApp number is required"; // Assuming this is still a required field
+    if (!shippingAddress.address.trim()) newErrors.address = "Address is required";
+    if (!shippingAddress.city.trim()) newErrors.city = "City is required";
+    if (!shippingAddress.state.trim()) newErrors.state = "State is required";
+    if (!shippingAddress.zipCode.trim()) newErrors.zipCode = "Zip code is required";
+    if (!shippingAddress.country.trim()) newErrors.country = "Country is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   }
-  
+
   // Function to place an order
   const placeOrder = async () => {
-    // Validate form data
-    if (!validateFormData()) {
-      return
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields correctly.",
+        variant: "destructive",
+      })
+      return;
     }
-    
+
     setIsProcessingOrder(true)
-    
+
     try {
       // Prepare order data
       const orderData = {
         items: items.map(item => ({
-          product: item.id,
+          product: item.id, 
           name: item.name,
           quantity: item.quantity,
           price: item.price,
           salePrice: item.salePrice,
           image: item.image,
-          options: item.options
+          // Ensure item.options is stringified if it's an object, as the Order model expects a String
+          options: typeof item.options === 'string' ? item.options : JSON.stringify(item.options), 
         })),
-        shippingAddress: {
+        shippingAddress: { // Ensure all fields match the Order model
           fullName: shippingAddress.fullName,
           address: shippingAddress.address,
           city: shippingAddress.city,
           state: shippingAddress.state,
           zipCode: shippingAddress.zipCode,
           country: shippingAddress.country,
-          phone: shippingAddress.phone
+          phone: shippingAddress.phone,
+          whatsappNumber: shippingAddress.whatsappNumber, // Include if in your Order model
+          email: shippingAddress.email, // Include if in your Order model
         },
         paymentMethod: paymentDetails.method,
         subtotal,
@@ -122,146 +158,49 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         tax,
         total,
         deliveryNotes: shippingAddress.deliveryNotes,
-        deliveryPriority: "standard",
-        estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+        // Defaulting these as per your original context, adjust if needed
+        deliveryPriority: "standard", 
+        estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() 
       }
-      
-      // Mock payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
       
       // Create the order in the database
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderData)
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
       })
-      
+
       if (!response.ok) {
-        throw new Error('Failed to create order')
+        const errorData = await response.json().catch(() => ({ message: "Failed to create order. Please try again." }))
+        throw new Error(errorData.message || "Failed to create order")
       }
-      
-      const order = await response.json()
-      
-      // Mock payment processing (always successful in this mock version)
-      const paymentResponse = await mockPaymentProcessing(paymentDetails, total)
-      
-      if (paymentResponse.success) {
-        // Update the order with payment status
-        await fetch(`/api/orders/${order._id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            paymentStatus: 'paid'
-          })
-        })
-        
-        // Show success message
-        toast({
-          title: "Order placed successfully!",
-          description: `Your order #${order._id.substring(0, 8)} has been placed successfully.`,
-        })
-        
-        // Clear the cart
-        clearCart()
-        
-        // Redirect to order confirmation - Use a more direct approach with window.location
-        // This ensures the redirect happens even if there are pending promises or state updates
-        window.location.href = `/order-confirmation/${order._id}`
-      } else {
-        // Handle payment failure
-        toast({
-          title: "Payment failed",
-          description: "There was an issue processing your payment. Please try again.",
-          variant: "destructive"
-        })
+
+      const orderResponse = await response.json()
+      // The actual order data might be nested under a 'data' property or be the direct response
+      const orderId = orderResponse?.data?._id || orderResponse?._id;
+
+      if (!orderId) {
+        throw new Error("Order ID not found in response.")
       }
-    } catch (error) {
-      console.error('Error placing order:', error)
+
       toast({
-        title: "Something went wrong",
-        description: "There was an error placing your order. Please try again.",
-        variant: "destructive"
+        title: "Order Placed!",
+        description: `Your order #${orderId.substring(0,8)} has been placed successfully.`,
+      })
+      clearCart()
+      router.push(`/order-confirmation/${orderId}`) // Navigate to order confirmation
+    } catch (error: any) {
+      console.error("Place order error:", error)
+      toast({
+        title: "Order Failed",
+        description: error.message || "There was an issue placing your order. Please try again.",
+        variant: "destructive",
       })
     } finally {
       setIsProcessingOrder(false)
     }
   }
-  
-  // Mock payment processing function (always returns success for now)
-  const mockPaymentProcessing = async (paymentDetails: PaymentDetails, amount: number) => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Validate card number format (mock validation)
-    const isCardValid = paymentDetails.cardNumber?.replace(/\s/g, '').length === 16
-    
-    // Always return success for the mock implementation
-    return {
-      success: true,
-      transactionId: `txn_${Math.random().toString(36).substring(2, 10)}`,
-      amount,
-      paymentMethod: paymentDetails.method
-    }
-  }
-  
-  // Validate form data
-  const validateFormData = () => {
-    // Check if shipping address is complete
-    if (
-      !shippingAddress.fullName ||
-      !shippingAddress.email ||
-      !shippingAddress.phone ||
-      !shippingAddress.address ||
-      !shippingAddress.city ||
-      !shippingAddress.state ||
-      !shippingAddress.zipCode
-    ) {
-      toast({
-        title: "Missing shipping information",
-        description: "Please fill in all required shipping details",
-        variant: "destructive"
-      })
-      return false
-    }
-    
-    // Check if payment details are complete
-    if (paymentDetails.method === "online") {
-      if (
-        !paymentDetails.cardNumber ||
-        !paymentDetails.expiry ||
-        !paymentDetails.cvv ||
-        !paymentDetails.nameOnCard
-      ) {
-        toast({
-          title: "Missing payment information",
-          description: "Please fill in all required payment details",
-          variant: "destructive"
-        })
-        return false
-      }
-    } else if (paymentDetails.method === "cod") {
-      if (
-        !paymentDetails.cardNumber ||
-        !paymentDetails.expiry ||
-        !paymentDetails.cvv ||
-        !paymentDetails.nameOnCard
-      ) {
-        toast({
-          title: "Missing advance payment information",
-          description: "Please fill in all required advance payment details",
-          variant: "destructive"
-        })
-        return false
-      }
-    }
-    
-    return true
-  }
-  
+
   return (
     <CheckoutContext.Provider
       value={{
@@ -270,7 +209,8 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         updateShippingAddress,
         updatePaymentDetails,
         isProcessingOrder,
-        placeOrder
+        placeOrder,
+        errors
       }}
     >
       {children}
