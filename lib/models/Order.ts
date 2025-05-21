@@ -72,6 +72,9 @@ const orderSchema = new mongoose.Schema({
     whatsappNumber: { // Added whatsappNumber to shippingAddress
       type: String,
       required: true
+    },
+    landmark: {
+      type: String,
     }
   },
   paymentMethod: {

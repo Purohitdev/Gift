@@ -32,6 +32,7 @@ type Order = {
     zipCode: string
     country: string
     phone: string
+    landmark?: string; // Added landmark
   }
   items: OrderItem[]
   subtotal: number
@@ -236,6 +237,7 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
                   <div className="text-sm space-y-1">
                     <p className="font-medium">{order.shippingAddress.fullName}</p>
                     <p>{order.shippingAddress.address}</p>
+                    {order.shippingAddress.landmark && <p>{order.shippingAddress.landmark}</p>}
                     <p>
                       {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
                     </p>

@@ -60,6 +60,7 @@ type Order = {
     phone: string;
     email: string;
     whatsappNumber: string;
+    landmark?: string; // Added landmark
   };
   paymentMethod: string;
   paymentStatus: string;
@@ -71,6 +72,7 @@ type Order = {
   deliveryNotes: string;
   deliveryPriority: string;
   createdAt: string;
+  updatedAt?: string; // Added for consistency with timestamps
 };
 
 export default function AdminPage() {
