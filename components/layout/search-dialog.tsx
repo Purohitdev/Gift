@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { products, categories } from "@/lib/data"
+
+interface Category {
+  id: number;
+  name: string;
+  image: string;
+  link: string;
+}
 
 export default function SearchDialog() {
   const router = useRouter()
@@ -19,6 +25,35 @@ export default function SearchDialog() {
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([])
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<any[]>([]); // Add state for products
+
+  // Fetch categories and products
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const catResponse = await fetch('/api/categories');
+        if (catResponse.ok) {
+          const catData = await catResponse.json();
+          setCategories(catData);
+        } else {
+          console.error("Failed to fetch categories");
+        }
+
+        const prodResponse = await fetch('/api/products');
+        if (prodResponse.ok) {
+          const prodData = await prodResponse.json();
+          // Assuming the API returns products in a 'products' field or directly as an array
+          setProducts(prodData.products || prodData);
+        } else {
+          console.error("Failed to fetch products");
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Load search history from localStorage
   useEffect(() => {
@@ -30,18 +65,20 @@ export default function SearchDialog() {
     const viewed = localStorage.getItem("recentlyViewed")
     if (viewed) {
       try {
-        const viewedProducts = JSON.parse(viewed)
-        // Find the actual products from the IDs
-        const viewedProductsData = viewedProducts
-          .map((id: number) => products.find((p) => p.id === id))
-          .filter(Boolean)
-          .slice(0, 4)
-        setRecentlyViewed(viewedProductsData)
+        const viewedProductIds = JSON.parse(viewed)
+        // Find the actual products from the fetched products state
+        if (products.length > 0) {
+          const viewedProductsData = viewedProductIds
+            .map((id: string) => products.find((p) => p._id === id || p.id === id)) // Adjust based on your product ID field
+            .filter(Boolean)
+            .slice(0, 4)
+          setRecentlyViewed(viewedProductsData)
+        }
       } catch (error) {
         console.error("Failed to parse recently viewed products:", error)
       }
     }
-  }, [])
+  }, [products]) // Add products to dependency array
 
   // Save search history to localStorage
   useEffect(() => {
@@ -50,7 +87,7 @@ export default function SearchDialog() {
 
   // Search products
   useEffect(() => {
-    if (searchTerm.trim() === "") {
+    if (searchTerm.trim() === "" || products.length === 0) { // Check if products are loaded
       setSearchResults([])
       return
     }
@@ -63,7 +100,7 @@ export default function SearchDialog() {
         product.category.toLowerCase().includes(term),
     )
     setSearchResults(results.slice(0, 5)) // Limit to 5 results
-  }, [searchTerm])
+  }, [searchTerm, products]) // Add products to dependency array
 
   const handleSearch = () => {
     if (searchTerm.trim() === "") return
@@ -94,7 +131,7 @@ export default function SearchDialog() {
     setOpen(false)
   }
 
-  const handleProductClick = (productId: number) => {
+  const handleProductClick = (productId: string) => { // Changed to string if using MongoDB _id
     router.push(`/products/${productId}`)
     setOpen(false)
   }
@@ -136,13 +173,13 @@ export default function SearchDialog() {
               <div className="space-y-3">
                 {searchResults.map((product) => (
                   <div
-                    key={product.id}
+                    key={product._id || product.id} // Adjust based on your product ID field
                     className="flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer"
-                    onClick={() => handleProductClick(product.id)}
+                    onClick={() => handleProductClick(product._id || product.id)} // Adjust
                   >
                     <div className="relative h-12 w-12 rounded-md overflow-hidden border">
                       <Image
-                        src={product.image || "/placeholder.svg"}
+                        src={product.image || product.img || "/placeholder.svg"} // Adjust image field
                         alt={product.name}
                         fill
                         className="object-cover"
@@ -155,11 +192,11 @@ export default function SearchDialog() {
                     <div className="text-sm font-medium">
                       {product.salePrice ? (
                         <>
-                          <span className="text-primary">${product.salePrice}</span>{" "}
-                          <span className="text-muted-foreground line-through text-xs">${product.price}</span>
+                          <span className="text-primary">₹{product.salePrice}</span>{" "}
+                          <span className="text-muted-foreground line-through text-xs">₹{product.price}</span>
                         </>
                       ) : (
-                        <span>${product.price}</span>
+                        <span>₹{product.price}</span>
                       )}
                     </div>
                   </div>
@@ -248,7 +285,7 @@ export default function SearchDialog() {
               <div className="mb-6">
                 <h3 className="text-sm font-medium mb-3">Popular Categories</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {categories.slice(0, 6).map((category) => (
+                  {categories.length > 0 ? categories.slice(0, 6).map((category) => (
                     <Button
                       key={category.id}
                       variant="outline"
@@ -268,7 +305,7 @@ export default function SearchDialog() {
                       </div>
                       <span>{category.name}</span>
                     </Button>
-                  ))}
+                  )) : <p>Loading categories...</p>}
                 </div>
               </div>
 
@@ -278,13 +315,13 @@ export default function SearchDialog() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {recentlyViewed.map((product) => (
                       <div
-                        key={product.id}
+                        key={product._id || product.id} // Adjust
                         className="cursor-pointer group"
-                        onClick={() => handleProductClick(product.id)}
+                        onClick={() => handleProductClick(product._id || product.id)} // Adjust
                       >
                         <div className="relative aspect-square rounded-md overflow-hidden border mb-2">
                           <Image
-                            src={product.image || "/placeholder.svg"}
+                            src={product.image || product.img || "/placeholder.svg"} // Adjust
                             alt={product.name}
                             fill
                             className="object-cover"
@@ -294,11 +331,11 @@ export default function SearchDialog() {
                         <p className="text-sm">
                           {product.salePrice ? (
                             <>
-                              <span className="font-medium">${product.salePrice}</span>{" "}
-                              <span className="text-muted-foreground line-through text-xs">${product.price}</span>
+                              <span className="font-medium">₹{product.salePrice}</span>{" "}
+                              <span className="text-muted-foreground line-through text-xs">₹{product.price}</span>
                             </>
                           ) : (
-                            <span className="font-medium">${product.price}</span>
+                            <span className="font-medium">₹{product.price}</span>
                           )}
                         </p>
                       </div>

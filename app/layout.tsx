@@ -7,6 +7,7 @@ import Footer from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/lib/cart-context"
 import { WishlistProvider } from "@/lib/wishlist-context"
+import { Toaster } from "@/components/ui/toaster" // Import the Toaster component
 
 import {
   ClerkProvider,
@@ -53,6 +54,7 @@ export default function RootLayout({
                 <Header />
                 {children}
                 <Footer />
+                <Toaster /> {/* Add the Toaster component here */}
               </WishlistProvider>
             </CartProvider>
           </ThemeProvider>
