@@ -9,6 +9,7 @@ import ProductHighlights from "@/components/product/product-highlights"
 import FaqSection from "@/components/product/faq-section"
 import FomoPopup from "@/components/product/fomo-popup"
 import RelatedProducts from "@/components/product/related-products"
+import ProductDescription from "@/components/product/product-description"
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -102,6 +103,7 @@ export default function ProductDetailPage() {
         </div>
 
         <ProductHighlights highlights={product.highlights} />
+        <ProductDescription description={product.description} />
         {/* <SampleWorks /> */}
               <RelatedProducts currentProductId={productId} />
 
