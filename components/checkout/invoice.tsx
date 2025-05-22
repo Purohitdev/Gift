@@ -30,6 +30,7 @@ type OrderProps = {
     zipCode: string
     country: string
     phone: string
+    landmark?: string; // Added landmark
   }
   items: OrderItem[]
   subtotal: number
@@ -196,6 +197,7 @@ const InvoicePDF = ({ order }: { order: OrderProps }) => {
           <View style={styles.addressBox}>
             <Text>{order.shippingAddress.fullName}</Text>
             <Text>{order.shippingAddress.address}</Text>
+            {order.shippingAddress.landmark && <Text>{order.shippingAddress.landmark}</Text>}
             <Text>
               {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
             </Text>

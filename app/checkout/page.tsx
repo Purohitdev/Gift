@@ -54,7 +54,10 @@ export default function CheckoutPage() {
           image: item.image, // This should be the product image URL
           options: typeof item.options === 'string' ? item.options : JSON.stringify(item.options),
         })),
-        shippingAddress: formData, // formData now includes email and whatsappNumber
+        shippingAddress: {
+          ...formData,
+          landmark: formData.landmark, // Ensure landmark is included
+        }, 
         paymentMethod: "cod", // Defaulting to COD for simplicity
         subtotal,
         shipping,

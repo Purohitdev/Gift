@@ -14,6 +14,7 @@ export interface CheckoutFormData {
   phone: string
   whatsappNumber: string
   address: string
+  landmark: string // Added landmark field
   city: string
   state: string
   zipCode: string
@@ -32,6 +33,7 @@ const initialFormData: CheckoutFormData = {
   phone: "",
   whatsappNumber: "",
   address: "",
+  landmark: "", // Added initial empty value
   city: "",
   state: "",
   zipCode: "",
@@ -59,6 +61,7 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required"
     if (!formData.whatsappNumber.trim()) newErrors.whatsappNumber = "WhatsApp number is required"
     if (!formData.address.trim()) newErrors.address = "Address is required"
+    if (!formData.landmark.trim()) newErrors.landmark = "Landmark is required" // Added validation
     if (!formData.city.trim()) newErrors.city = "City is required"
     if (!formData.state.trim()) newErrors.state = "State is required"
     if (!formData.zipCode.trim()) newErrors.zipCode = "Zip code is required"
@@ -113,6 +116,12 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
             {errors.address && <p className="text-sm text-red-500 pt-1">{errors.address}</p>}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="landmark">Landmark</Label>
+            <Input id="landmark" name="landmark" value={formData.landmark} onChange={handleChange} />
+            {errors.landmark && <p className="text-sm text-red-500 pt-1">{errors.landmark}</p>}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="city">City</Label>
@@ -134,7 +143,6 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
           <div className="space-y-2">
             <Label htmlFor="country">Country</Label>
             <Input id="country" name="country" value={formData.country} onChange={handleChange} />
-            {/* Consider using a Select component for countries for better UX */}
             {errors.country && <p className="text-sm text-red-500 pt-1">{errors.country}</p>}
           </div>
 
@@ -153,4 +161,3 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
     </Card>
   )
 }
-

@@ -27,45 +27,6 @@ export const heroSlides = [
   },
 ]
 
-export const categories = [
-  {
-    id: 1,
-    name: "Photo Frames",
-    image: "https://i.pinimg.com/736x/45/34/8a/45348af986462a10cd40aee9e87fe1f4.jpg",
-    link: "/products?category=frames",
-  },
-  {
-    id: 2,
-    name: "Custom Mugs",
-    image: "https://i.pinimg.com/736x/97/e7/6a/97e76a6c0514da7fa6d22b9b64502221.jpg",
-    link: "/products?category=mugs",
-  },
-  {
-    id: 3,
-    name: "Keychains",
-    image: "https://i.pinimg.com/736x/53/97/d1/5397d1f9f7fd904471bff0be5dd9e98f.jpg",
-    link: "/products?category=keychains",
-  },
-  {
-    id: 4,
-    name: "Cushions",
-    image: "https://i.pinimg.com/736x/f5/e1/5b/f5e15b8d498be68956afc91a1e0a9955.jpg",
-    link: "/products?category=cushions",
-  },
-  {
-    id: 5,
-    name: "Wall Art",
-    image: "https://i.pinimg.com/736x/b0/0d/89/b00d89e413fd1a97e81067eced23e182.jpg",
-    link: "/products?category=wall-art",
-  },
-  {
-    id: 6,
-    name: "Jewelry",
-    image: "https://i.pinimg.com/736x/ea/0e/d9/ea0ed9dc5d090ca35da0b301850b304b.jpg",
-    link: "/products?category=jewelry",
-  },
-]
-
 export const products = [
   {
     id: 1,

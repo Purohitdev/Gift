@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductsList from "@/components/admin/products-list";
 import { PlusCircle } from "lucide-react";
+import CategoriesList from "@/components/admin/categories-list"; // Import CategoriesList
 
 function Dialog({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
   if (!open) return null;
@@ -60,6 +61,7 @@ type Order = {
     phone: string;
     email: string;
     whatsappNumber: string;
+    landmark?: string; // Added landmark
   };
   paymentMethod: string;
   paymentStatus: string;
@@ -71,6 +73,7 @@ type Order = {
   deliveryNotes: string;
   deliveryPriority: string;
   createdAt: string;
+  updatedAt?: string; // Added for consistency with timestamps
 };
 
 export default function AdminPage() {
@@ -83,6 +86,15 @@ export default function AdminPage() {
   const [ordersError, setOrdersError] = useState<string | null>(null);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Determine initial tab based on URL query param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab === "categories" || tab === "products" || tab === "orders") {
+      setActiveTab(tab);
+    }
+  }, []);
 
   useEffect(() => {
     if (isLoaded) {
@@ -134,16 +146,22 @@ export default function AdminPage() {
               </Link>
             </Button>
           )}
+          {/* Add Category button could be inside CategoriesList component or here */}
         </div>
 
         <Tabs
+          value={activeTab} // Control active tab
           defaultValue="products"
           className="w-full"
-          onValueChange={setActiveTab}
+          onValueChange={(value) => {
+            setActiveTab(value);
+            router.push(`/admin?tab=${value}`, { scroll: false }); // Update URL without full page reload
+          }}
         >
-          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
+          <TabsList className="grid w-full md:w-[400px] grid-cols-3"> {/* Adjusted for 3 tabs */}
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger> {/* Add Categories Tab Trigger */}
           </TabsList>
 
           <TabsContent value="products" className="mt-6">
@@ -172,22 +190,54 @@ export default function AdminPage() {
                       <th className="px-4 py-2 border-b">Customer</th>
                       <th className="px-4 py-2 border-b">Total</th>
                       <th className="px-4 py-2 border-b">Status</th>
+                      <th className="px-4 py-2 border-b">Payment Status</th>
                       <th className="px-4 py-2 border-b">Date</th>
+                      <th className="px-4 py-2 border-b">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {orders.map((order) => (
                       <tr
                         key={order._id}
-                        className="hover:bg-gray-50 cursor-pointer"
-                        onClick={() => setSelectedOrder(order)}
+                        // className="hover:bg-gray-50 cursor-pointer"
+                        // onClick={() => setSelectedOrder(order)}
                       >
-                        <td className="px-4 py-2 border-b">{order._id}</td>
-                        <td className="px-4 py-2 border-b">{order.shippingAddress.fullName}</td>
-                        <td className="px-4 py-2 border-b">${order.total.toFixed(2)}</td>
-                        <td className="px-4 py-2 border-b">{order.orderStatus}</td>
                         <td className="px-4 py-2 border-b">
-                          {new Date(order.createdAt).toLocaleString()}
+                            <Button variant="link" className="p-0 h-auto" onClick={() => setSelectedOrder(order)}>
+                                {order._id?.substring(0,8) || order.id?.substring(0,8)}
+                            </Button>
+                        </td>
+                        <td className="px-4 py-2 border-b">{order.shippingAddress.fullName}</td>
+                        <td className="px-4 py-2 border-b">₹{order.total.toFixed(2)}</td>
+                        <td className="px-4 py-2 border-b">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ 
+                            order.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                            order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                            order.orderStatus === 'delivered' ? 'bg-green-100 text-green-700' :
+                            order.orderStatus === 'cancelled' ? 'bg-red-100 text-red-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {order.orderStatus}
+                          </span>
+                          </td>
+                        <td className="px-4 py-2 border-b">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ 
+                            order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' :
+                            order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            order.paymentStatus === 'failed' ? 'bg-red-100 text-red-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {order.paymentStatus}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 border-b">
+                          {new Date(order.createdAt).toLocaleDateString()} 
+                          <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                        </td>
+                        <td className="px-4 py-2 border-b">
+                            <Button variant="outline" size="sm" onClick={() => setSelectedOrder(order)}>
+                                View Details
+                            </Button>
                         </td>
                       </tr>
                     ))}
@@ -195,121 +245,74 @@ export default function AdminPage() {
                 </table>
                 <Dialog open={!!selectedOrder} onClose={() => setSelectedOrder(null)}>
                   {selectedOrder && (
-                    <div>
-                      <h2 className="text-xl font-bold mb-2">Order Details</h2>
-                      <div className="mb-2">
-                        <strong>Order ID:</strong> {selectedOrder._id}
+                    <div className="max-h-[80vh] overflow-y-auto">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold">Order Details</h2>
+                        {/* <OrderStatusUpdater orderId={selectedOrder._id!} currentStatus={selectedOrder.orderStatus} onStatusChange={(newStatus) => {
+                           setSelectedOrder(prev => prev ? {...prev, orderStatus: newStatus} : null);
+                           setOrders(prevOrders => prevOrders.map(o => o._id === selectedOrder._id ? {...o, orderStatus: newStatus} : o));
+                        }}/> */}
                       </div>
-                      <div className="mb-2">
-                        <strong>Customer:</strong> {selectedOrder.shippingAddress.fullName}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Email:</strong> {selectedOrder.shippingAddress.email}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Phone:</strong> {selectedOrder.shippingAddress.phone}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Address:</strong> {selectedOrder.shippingAddress.address}, {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}, {selectedOrder.shippingAddress.zipCode}, {selectedOrder.shippingAddress.country}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Payment Method:</strong> {selectedOrder.paymentMethod}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Payment Status:</strong> {selectedOrder.paymentStatus}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Order Status:</strong> {selectedOrder.orderStatus}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Subtotal:</strong> ${selectedOrder.subtotal.toFixed(2)}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Shipping:</strong> ${selectedOrder.shipping.toFixed(2)}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Tax:</strong> ${selectedOrder.tax.toFixed(2)}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Total:</strong> ${selectedOrder.total.toFixed(2)}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Delivery Notes:</strong> {selectedOrder.deliveryNotes}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Delivery Priority:</strong> {selectedOrder.deliveryPriority}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Date:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}
-                      </div>
-                        {/* Customer Details */}
-                        <div className="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-100">
-                        <h3 className="text-lg font-semibold mb-2 text-blue-700">Customer Details</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                          <div>
-                          <strong>Name:</strong> {selectedOrder.shippingAddress.fullName}
-                          </div>
-                          <div>
-                          <strong>Email:</strong> {selectedOrder.shippingAddress.email}
-                          </div>
-                          <div>
-                          <strong>Phone:</strong> {selectedOrder.shippingAddress.phone}
-                          </div>
-                          <div>
-                          <strong>WhatsApp:</strong> {selectedOrder.shippingAddress.whatsappNumber}
-                          </div>
-                          <div className="md:col-span-2">
-                          <strong>Address:</strong> {selectedOrder.shippingAddress.address}, {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}, {selectedOrder.shippingAddress.zipCode}, {selectedOrder.shippingAddress.country}
-                          </div>
-                        </div>
-                        </div>
+                      <p className="mb-1"><strong className="font-semibold">Order ID:</strong> {selectedOrder._id?.substring(0,8) || selectedOrder.id?.substring(0,8)}</p>
+                      <p className="mb-1"><strong className="font-semibold">Date:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                      <p className="mb-1"><strong className="font-semibold">Status:</strong> {selectedOrder.orderStatus}</p>
+                      <p className="mb-4"><strong className="font-semibold">Payment Status:</strong> {selectedOrder.paymentStatus}</p>
 
-                        {/* Items Details */}
-                        <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-100">
-                        <h3 className="text-lg font-semibold mb-2 text-green-700">Order Items</h3>
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full text-sm">
-                          <thead>
-                            <tr>
-                            <th className="px-2 py-2 text-left">Image</th>
-                            <th className="px-2 py-2 text-left">Product</th>
-                            <th className="px-2 py-2 text-left">Options</th>
-                            <th className="px-2 py-2 text-left">Quantity</th>
-                            <th className="px-2 py-2 text-left">Price</th>
-                            <th className="px-2 py-2 text-left">Total</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {selectedOrder.items.map((item) => (
-                            <tr key={item._id} className="border-t">
-                              <td className="px-2 py-2">
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-12 h-12 object-cover rounded border"
-                              />
-                              </td>
-                              <td className="px-2 py-2 font-medium">{item.name}</td>
-                              <td className="px-2 py-2 text-gray-600">{item.options}</td>
-                              <td className="px-2 py-2">{item.quantity}</td>
-                              <td className="px-2 py-2">
-                              ${item.salePrice ? item.salePrice.toFixed(2) : item.price.toFixed(2)}
-                              </td>
-                              <td className="px-2 py-2">
-                              ${(item.quantity * (item.salePrice || item.price)).toFixed(2)}
-                              </td>
-                            </tr>
-                            ))}
-                          </tbody>
-                          </table>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2 border-b pb-1">Shipping Address</h3>
+                          <p>{selectedOrder.shippingAddress.fullName}</p>
+                          <p>{selectedOrder.shippingAddress.address}</p>
+                          {selectedOrder.shippingAddress.landmark && <p>{selectedOrder.shippingAddress.landmark}</p>}
+                          <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
+                          <p>{selectedOrder.shippingAddress.country}</p>
+                          <p>Phone: {selectedOrder.shippingAddress.phone}</p>
+                          {selectedOrder.shippingAddress.email && <p>Email: {selectedOrder.shippingAddress.email}</p>}
+                           {selectedOrder.shippingAddress.whatsappNumber && <p>WhatsApp: {selectedOrder.shippingAddress.whatsappNumber}</p>}
                         </div>
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2 border-b pb-1">Payment Details</h3>
+                          <p><strong className="font-semibold">Method:</strong> {selectedOrder.paymentMethod}</p>
+                          <p><strong className="font-semibold">Subtotal:</strong> ₹{selectedOrder.subtotal.toFixed(2)}</p>
+                          <p><strong className="font-semibold">Shipping:</strong> ₹{selectedOrder.shipping.toFixed(2)}</p>
+                          <p><strong className="font-semibold">Tax:</strong> ₹{selectedOrder.tax.toFixed(2)}</p>
+                          <p className="text-lg font-bold mt-1"><strong className="font-semibold">Total:</strong> ₹{selectedOrder.total.toFixed(2)}</p>
                         </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2 border-b pb-1">Items</h3>
+                        {selectedOrder.items.map((item, index) => (
+                          <div key={item._id || index} className="flex gap-4 mb-3 pb-3 border-b last:border-b-0 last:pb-0 last:mb-0">
+                            <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                            <div>
+                              <p className="font-semibold">{item.name}</p>
+                              <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                              <p className="text-sm text-gray-600">Price: ₹{(item.salePrice || item.price).toFixed(2)}</p>
+                              {item.options && <p className="text-xs text-gray-500">Options: {item.options}</p>}
+                            </div>
+                            <p className="ml-auto font-semibold">₹{((item.salePrice || item.price) * item.quantity).toFixed(2)}</p>
+                          </div>
+                        ))}
+                      </div>
+                      {selectedOrder.deliveryNotes && (
+                        <div className="mt-6">
+                            <h3 className="text-lg font-semibold mb-1">Delivery Notes</h3>
+                            <p className="text-sm p-3 bg-gray-50 rounded-md">{selectedOrder.deliveryNotes}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </Dialog>
               </div>
             )}
           </TabsContent>
+          
+          {/* Add Categories Tab Content */}
+          <TabsContent value="categories" className="mt-6">
+            <CategoriesList />
+          </TabsContent>
+
         </Tabs>
       </div>
     </div>
