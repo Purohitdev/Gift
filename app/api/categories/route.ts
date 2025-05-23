@@ -3,8 +3,6 @@ import mongoose from "mongoose";
 import clientPromise from "@/lib/mongodb";
 import Category from "@/lib/models/Category";
 import NodeCache from "node-cache";
-import fs from "fs/promises";
-import path from "path";
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -39,12 +37,19 @@ export async function GET(req: NextRequest) {
     const cachedCategories = cache.get("categories");
     if (cachedCategories) {
       return NextResponse.json(cachedCategories);
-    }
-
-    await connectDB();
-    const categories = await Category.find({}).sort({ name: 1 });
-
-    // Cache the categories
+    }    await connectDB();
+    const categoriesFromDB = await Category.find({}).sort({ name: 1 });
+    
+    // Transform categories to exclude binary data
+    const categories = categoriesFromDB.map(category => ({
+      _id: category._id,
+      id: category.id,
+      name: category.name,
+      link: category.link,
+      imageUrl: `/api/categories/${category.id}/image`,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt
+    }));    // Cache the categories
     cache.set("categories", categories);
 
     return NextResponse.json(categories);
@@ -64,7 +69,6 @@ export async function POST(req: NextRequest) {
     const name = formData.get("name") as string;
     const id = formData.get("id") as string;
     const imageFile = formData.get("image") as File | null;
-    let imageUrl = formData.get("existingImage") as string | null;
 
     if (!id || !name) {
       return NextResponse.json(
@@ -77,7 +81,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!imageFile && !imageUrl) {
+    if (!imageFile) {
       return NextResponse.json(
         {
           success: false,
@@ -112,43 +116,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (imageFile) {
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "categories"
-      );
-      await fs.mkdir(uploadsDir, { recursive: true });
-
-      const fileExtension = path.extname(imageFile.name);
-      const uniqueFilename = `${Date.now()}-${generateSlug(
-        path.basename(imageFile.name, fileExtension)
-      )}${fileExtension}`;
-      const imagePath = path.join(uploadsDir, uniqueFilename);
-
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      await fs.writeFile(imagePath, buffer);
-      imageUrl = `/uploads/categories/${uniqueFilename}`;
-    }
-
+    // Process image file
+    const buffer = Buffer.from(await imageFile.arrayBuffer());
+    const contentType = imageFile.type;
+    
     const link = `/products?category=${generateSlug(name)}`;
 
     const newCategory = new Category({
       id: Number(id),
       name,
-      image: imageUrl,
+      image: {
+        data: buffer,
+        contentType
+      },
       link,
     });
     await newCategory.save();
 
     cache.del("categories");
 
+    // Return a response without the binary data to keep the payload small
     return NextResponse.json(
       {
         success: true,
         message: "Category created successfully",
-        data: newCategory,
+        data: {
+          _id: newCategory._id,
+          id: newCategory.id,
+          name: newCategory.name,
+          link: newCategory.link,
+        },
         toastType: "success",
       },
       { status: 201 }

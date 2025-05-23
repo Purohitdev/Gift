@@ -12,7 +12,10 @@ interface Category {
   _id: string;
   id: number;
   name: string;
-  image: string;
+  image?: {
+    data: Buffer;
+    contentType: string;
+  } | string; // Support both old and new format during transition
   link: string;
   createdAt?: string;
   updatedAt?: string;
@@ -127,10 +130,13 @@ const CategoriesList: React.FC = () => {
                 {categories.map((category) => (
                 <TableRow key={category._id}>
                     <TableCell>{category.id}</TableCell>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium">{category.name}</TableCell>                    <TableCell>
                     {category.image && (
-                        <img src={category.image} alt={category.name} className="h-10 w-10 object-cover rounded-sm" />
+                        <img 
+                            src={`/api/categories/${category.id}/image`} 
+                            alt={category.name} 
+                            className="h-10 w-10 object-cover rounded-sm" 
+                        />
                     )}
                     </TableCell>
                     <TableCell><a href={category.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{category.link}</a></TableCell>

@@ -12,7 +12,10 @@ interface Category {
   _id?: string; // MongoDB ID
   id: number; // Custom numeric ID
   name: string;
-  image: string; // Will store URL or path to image
+  image?: string | {
+    data: Buffer;
+    contentType: string;
+  }; // Support both old string format and new binary format
   link: string; // Will be auto-generated
 }
 
@@ -65,7 +68,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category: initialCategory, 
       setImageFile(e.target.files[0]);
     }
   };
-
  const handleSubmit = async (e: FormEvent) => {
   e.preventDefault();
   setIsLoading(true);
@@ -97,8 +99,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category: initialCategory, 
 
   if (imageFile) {
     formData.append('image', imageFile);
-  } else if (initialCategory?.image) {
-    formData.append('existingImage', initialCategory.image);
   }
 
   try {
@@ -192,8 +192,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category: initialCategory, 
           required
         />
       </div>
-      <div>
-        <Label htmlFor="image">Category Image</Label>
+      <div>        <Label htmlFor="image">Category Image</Label>
         <Input
           id="image"
           name="image"
@@ -202,7 +201,10 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category: initialCategory, 
           accept="image/*" 
         />
         {initialCategory?.image && !imageFile && (
-          <p className="text-xs text-muted-foreground mt-1">Current image: <a href={initialCategory.image} target="_blank" rel="noopener noreferrer" className="underline">{initialCategory.image.split('/').pop()}</a></p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Current image: <a href={`/api/categories/${initialCategory.id}/image`} target="_blank" rel="noopener noreferrer" className="underline">View Image</a>
+            <img src={`/api/categories/${initialCategory.id}/image`} alt={initialCategory.name} className="mt-2 h-20 w-20 object-cover rounded-md border" />
+          </p>
         )}
         {imageFile && (
             <p className="text-xs text-muted-foreground mt-1">Selected file: {imageFile.name}</p>
