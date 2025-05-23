@@ -51,6 +51,10 @@ type Order = {
     options: string;
     _id: string;
   }[];
+  customImage?: {
+    data: string;
+    description: string;
+  };
   shippingAddress: {
     fullName: string;
     address: string;
@@ -294,11 +298,26 @@ export default function AdminPage() {
                             <p className="ml-auto font-semibold">₹{((item.salePrice || item.price) * item.quantity).toFixed(2)}</p>
                           </div>
                         ))}
-                      </div>
-                      {selectedOrder.deliveryNotes && (
+                      </div>                      {selectedOrder.deliveryNotes && (
                         <div className="mt-6">
                             <h3 className="text-lg font-semibold mb-1">Delivery Notes</h3>
                             <p className="text-sm p-3 bg-gray-50 rounded-md">{selectedOrder.deliveryNotes}</p>
+                        </div>
+                      )}
+                      
+                      {selectedOrder.customImage?.data && (
+                        <div className="mt-6">
+                            <h3 className="text-lg font-semibold mb-1">Customer Provided Image</h3>
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <img 
+                                src={selectedOrder.customImage.data} 
+                                alt="Customer provided image" 
+                                className="max-h-60 object-contain rounded-md mb-2" 
+                              />
+                              {selectedOrder.customImage.description && (
+                                <p className="text-sm text-gray-600"><strong>Description:</strong> {selectedOrder.customImage.description}</p>
+                              )}
+                            </div>
                         </div>
                       )}
                     </div>

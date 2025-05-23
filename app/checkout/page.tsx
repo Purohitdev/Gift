@@ -42,9 +42,7 @@ export default function CheckoutPage() {
             deliveryPriority = priority;
           }
         }
-      }
-
-      const orderData = {
+      }      const orderData = {
         items: items.map(item => ({
           product: item.id, // This should be the product ID
           name: item.name,
@@ -58,6 +56,10 @@ export default function CheckoutPage() {
           ...formData,
           landmark: formData.landmark, // Ensure landmark is included
         }, 
+        customImage: formData.customImage ? {
+          data: formData.customImage,
+          description: formData.imageDescription || ''
+        } : undefined,
         paymentMethod: "cod", // Defaulting to COD for simplicity
         subtotal,
         shipping,

@@ -34,8 +34,15 @@ const orderSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },  items: [orderItemSchema],
+  customImage: {
+    data: {
+      type: String
+    },
+    description: {
+      type: String
+    }
   },
-  items: [orderItemSchema],
   shippingAddress: {
     fullName: {
       type: String,

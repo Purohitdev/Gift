@@ -32,6 +32,10 @@ type OrderProps = {
     phone: string
     landmark?: string; // Added landmark
   }
+  customImage?: {
+    data: string;
+    description: string;
+  }
   items: OrderItem[]
   subtotal: number
   shipping: number
