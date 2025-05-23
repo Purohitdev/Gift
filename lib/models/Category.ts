@@ -12,8 +12,14 @@ const CategorySchema = new mongoose.Schema({
     unique: true
   },
   image: {
-    type: String,
-    required: [true, 'Please provide a category image']
+    data: {
+      type: Buffer,
+      required: [true, 'Please provide a category image']
+    },
+    contentType: {
+      type: String,
+      required: [true, 'Please provide the image content type']
+    }
   },
   link: {
     type: String,

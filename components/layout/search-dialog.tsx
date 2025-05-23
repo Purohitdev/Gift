@@ -14,7 +14,11 @@ import { Badge } from "@/components/ui/badge"
 interface Category {
   id: number;
   name: string;
-  image: string;
+  image?: string | {
+    data: Buffer;
+    contentType: string;
+  };
+  imageUrl?: string;
   link: string;
 }
 
@@ -294,10 +298,9 @@ export default function SearchDialog() {
                         router.push(category.link)
                         setOpen(false)
                       }}
-                    >
-                      <div className="relative h-8 w-8 rounded-full overflow-hidden mr-2">
+                    >                      <div className="relative h-8 w-8 rounded-full overflow-hidden mr-2">
                         <Image
-                          src={category.image || "/placeholder.svg"}
+                          src={`/api/categories/${category.id}/image`}
                           alt={category.name}
                           fill
                           className="object-cover"

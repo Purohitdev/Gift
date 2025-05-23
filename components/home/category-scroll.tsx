@@ -6,8 +6,20 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+interface Category {
+  _id: string;
+  id: number;
+  name: string;
+  image?: {
+    data: Buffer;
+    contentType: string;
+  } | string;
+  imageUrl?: string;
+  link: string;
+}
+
 export default function CategoryScroll() {
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -83,9 +95,8 @@ export default function CategoryScroll() {
         <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-4 pb-4" ref={scrollRef}>
           {categories.map((category) => (
             <Link key={category._id} href={category.link} className="flex-shrink-0 snap-start py-2">
-              <div className="flex flex-col items-center group">
-                <div className="relative h-32 w-32 md:h-60 md:w-60 rounded-full overflow-hidden mb-3 border-2 border-pastel-lavender shadow-pastel transition-transform duration-300 group-hover:scale-105">
-                  <Image src={category.image} alt={category.name} fill className="object-cover" />
+              <div className="flex flex-col items-center group">                <div className="relative h-32 w-32 md:h-60 md:w-60 rounded-full overflow-hidden mb-3 border-2 border-pastel-lavender shadow-pastel transition-transform duration-300 group-hover:scale-105">
+                  <Image src={`/api/categories/${category.id}/image`} alt={category.name} fill className="object-cover" />
                 </div>
                 <h3 className="text-sm md:text-base font-medium text-center">{category.name}</h3>
               </div>
