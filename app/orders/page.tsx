@@ -34,6 +34,10 @@ type Order = {
     country: string
     phone: string
   }
+  customImage?: {
+    data: string;
+    description: string;
+  }
   items: OrderItem[]
   subtotal: number
   shipping: number

@@ -34,6 +34,10 @@ type Order = {
     phone: string
     landmark?: string; // Added landmark
   }
+  customImage?: {
+    data: string;
+    description: string;
+  }
   items: OrderItem[]
   subtotal: number
   shipping: number
@@ -243,8 +247,7 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
                     </p>
                     <p>{order.shippingAddress.country}</p>
                     <p>{order.shippingAddress.phone}</p>
-                  </div>
-                </div>
+                  </div>                </div>
 
                 <Separator />
 
@@ -267,6 +270,27 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
                     </p>
                   </div>
                 </div>
+                
+                {order.customImage?.data && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium mb-2">Your Custom Image</h4>
+                      <div className="border rounded-md p-3">
+                        <img 
+                          src={order.customImage.data} 
+                          alt="Your uploaded image" 
+                          className="max-h-40 rounded-md object-contain mb-2" 
+                        />
+                        {order.customImage.description && (
+                          <p className="text-sm text-muted-foreground">
+                            <span className="font-medium">Description:</span> {order.customImage.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <Separator />
 

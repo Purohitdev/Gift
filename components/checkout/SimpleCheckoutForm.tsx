@@ -20,6 +20,8 @@ export interface CheckoutFormData {
   zipCode: string
   country: string
   deliveryNotes?: string
+  customImage?: string
+  imageDescription?: string
 }
 
 interface SimpleCheckoutFormProps {
@@ -39,6 +41,8 @@ const initialFormData: CheckoutFormData = {
   zipCode: "",
   country: "US", // Default country
   deliveryNotes: "",
+  customImage: "",
+  imageDescription: "",
 }
 
 export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleCheckoutFormProps) {
@@ -52,6 +56,18 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
       setErrors(prev => ({ ...prev, [name]: undefined }))
     }
   }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setFormData(prev => ({ ...prev, customImage: base64String }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const validate = (): boolean => {
     const newErrors: Partial<CheckoutFormData> = {}
@@ -154,6 +170,42 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
           <div className="space-y-2">
             <Label htmlFor="deliveryNotes">Delivery Notes (Optional)</Label>
             <Textarea id="deliveryNotes" name="deliveryNotes" value={formData.deliveryNotes} onChange={handleChange} />
+          </div>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="customImage">Upload an Image (Optional)</Label>
+              <Input 
+                id="customImage" 
+                name="customImage" 
+                type="file" 
+                accept="image/*"
+                onChange={handleImageUpload}
+              />
+              <p className="text-xs text-muted-foreground">Upload an image related to your order (max 5MB)</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="imageDescription">Image Description (Optional)</Label>
+              <Input 
+                id="imageDescription" 
+                name="imageDescription" 
+                value={formData.imageDescription} 
+                onChange={handleChange}
+                placeholder="Briefly describe the uploaded image"
+              />
+            </div>
+            
+            {formData.customImage && (
+              <div className="mt-2 border rounded-md p-2">
+                <p className="text-sm font-medium mb-1">Image Preview:</p>
+                <img 
+                  src={formData.customImage} 
+                  alt="Preview" 
+                  className="max-h-40 rounded-md object-contain"
+                />
+              </div>
+            )}
           </div>
         </CardContent>
         <CardFooter>
