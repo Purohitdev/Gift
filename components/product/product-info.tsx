@@ -142,62 +142,97 @@ export default function ProductInfo({ product }: { product: any }) {
             <Clock className="h-4 w-4" />
             <span>Limited time offer! Sale ends in:</span>
           </div>
-          <CountdownTimer />
+         <CountdownTimer/>
         </>
       )}
 
       <div className="space-y-4 pt-4 border-t">
-        <div className="space-y-2">
-          <Label htmlFor="faces">Number of Faces</Label>
-          <RadioGroup id="faces" value={faces} onValueChange={setFaces} className="flex flex-wrap gap-2">
-            <Label
-              htmlFor="faces-1"
-              className="border cursor-pointer rounded-md px-3 py-2 flex items-center gap-2 [&:has(:checked)]:bg-primary/10 [&:has(:checked)]:border-primary"
-            >
-              <RadioGroupItem id="faces-1" value="1" />1 Face
-            </Label>
-            <Label
-              htmlFor="faces-2"
-              className="border cursor-pointer rounded-md px-3 py-2 flex items-center gap-2 [&:has(:checked)]:bg-primary/10 [&:has(:checked)]:border-primary"
-            >
-              <RadioGroupItem id="faces-2" value="2" />2 Faces
-            </Label>
-            <Label
-              htmlFor="faces-3"
-              className="border cursor-pointer rounded-md px-3 py-2 flex items-center gap-2 [&:has(:checked)]:bg-primary/10 [&:has(:checked)]:border-primary"
-            >
-              <RadioGroupItem id="faces-3" value="3" />3 Faces
-            </Label>
-          </RadioGroup>
-        </div>
+      {/* Number of Faces */}
+<div className="space-y-2">
+  <Label htmlFor="faces">Number of Faces</Label>
+  <RadioGroup
+    id="faces"
+    value={faces}
+    onValueChange={setFaces}
+    className="grid grid-cols-3 gap-3 sm:flex sm:flex-wrap"
+  >
+    {["1", "2", "3"].map((value) => (
+      <Label
+        key={value}
+        htmlFor={`faces-${value}`}
+        className={`
+          group cursor-pointer rounded-xl border px-4 py-3 text-sm flex items-center gap-2 transition-all duration-200
+          bg-white/50
+          shadow-sm
+          hover:bg-muted/10
+          [&:has(:checked)]:bg-primary/10
+          [&:has(:checked)]:border-primary
+          [&:has(:checked)]:shadow-md
+        `}
+      >
+        <RadioGroupItem id={`faces-${value}`} value={value} />
+        {value} Face{value !== "1" ? "s" : ""}
+      </Label>
+    ))}
+  </RadioGroup>
+</div>
 
-        <div className="space-y-2">
-          <Label htmlFor="frame-size">Frame Size</Label>
-          <Select value={frameSize} onValueChange={setFrameSize}>
-            <SelectTrigger id="frame-size" className="bg-white/40">
-              <SelectValue placeholder="Select size" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="small">Small (8" x 10")</SelectItem>
-              <SelectItem value="medium">Medium (11" x 14")</SelectItem>
-              <SelectItem value="large">Large (16" x 20")</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+{/* Frame Size */}
+<div className="space-y-2">
+  <Label>Frame Size</Label>
+  <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+    {[
+      { value: "small", label: 'Small (8" x 10")' },
+      { value: "medium", label: 'Medium (11" x 14")' },
+      { value: "large", label: 'Large (16" x 20")' },
+    ].map(({ value, label }) => (
+      <button
+        key={value}
+        type="button"
+        onClick={() => setFrameSize(value)}
+        className={`rounded-xl px-4 py-3 text-sm transition-all duration-200
+          border
+          ${
+            frameSize === value
+              ? "bg-primary/10 border-primary shadow-md"
+              : "bg-white/50 border-muted text-muted-foreground hover:bg-muted/10 shadow-sm"
+          }
+        `}
+      >
+        {label}
+      </button>
+    ))}
+  </div>
+</div>
 
-        <div className="space-y-2">
-          <Label htmlFor="delivery">Delivery Priority</Label>
-          <Select value={delivery} onValueChange={setDelivery}>
-            <SelectTrigger id="delivery" className="bg-white/40">
-              <SelectValue placeholder="Select delivery" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="standard">Standard (7-10 days)</SelectItem>
-              <SelectItem value="express">Express (3-5 days) +$9.99</SelectItem>
-              <SelectItem value="rush">Rush (1-2 days) +$19.99</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+{/* Delivery Priority */}
+<div className="space-y-2">
+  <Label>Delivery Priority</Label>
+  <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+    {[
+      { value: "standard", label: "Standard (7-10 days)" },
+      { value: "express", label: "Express (3-5 days) +$9.99" },
+      { value: "rush", label: "Rush (1-2 days) +$19.99" },
+    ].map(({ value, label }) => (
+      <button
+        key={value}
+        type="button"
+        onClick={() => setDelivery(value)}
+        className={`rounded-xl px-4 py-3 text-sm transition-all duration-200
+          border
+          ${
+            delivery === value
+              ? "bg-primary/10 border-primary shadow-md"
+              : "bg-white/50 border-muted text-muted-foreground hover:bg-muted/10 shadow-sm"
+          }
+        `}
+      >
+        {label}
+      </button>
+    ))}
+  </div>
+</div>
+
 
         <div className="space-y-2">
           <Label htmlFor="whatsapp" className="flex items-center gap-1">

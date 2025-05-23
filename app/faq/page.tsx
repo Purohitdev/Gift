@@ -28,7 +28,7 @@ export default function FaqPage() {
   ]
 
   return (
-    <main className="min-h-screen py-12">
+    <main className="min-h-screen py-12 ">
       <div className="container px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">Frequently Asked Questions</h1>

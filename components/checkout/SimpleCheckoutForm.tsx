@@ -84,7 +84,7 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} />
@@ -97,7 +97,7 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} />
@@ -109,6 +109,9 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
               {errors.whatsappNumber && <p className="text-sm text-red-500 pt-1">{errors.whatsappNumber}</p>}
             </div>
           </div>
+
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div className="space-y-2">
             <Label htmlFor="address">Address</Label>
@@ -122,19 +125,21 @@ export default function SimpleCheckoutForm({ onSubmit, isProcessing }: SimpleChe
             {errors.landmark && <p className="text-sm text-red-500 pt-1">{errors.landmark}</p>}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          </div>
+
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="city">City</Label>
               <Input id="city" name="city" value={formData.city} onChange={handleChange} />
               {errors.city && <p className="text-sm text-red-500 pt-1">{errors.city}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="state">State / Province</Label>
+              <Label htmlFor="state">State</Label>
               <Input id="state" name="state" value={formData.state} onChange={handleChange} />
               {errors.state && <p className="text-sm text-red-500 pt-1">{errors.state}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="zipCode">Zip / Postal Code</Label>
+              <Label htmlFor="zipCode">Postal Code</Label>
               <Input id="zipCode" name="zipCode" value={formData.zipCode} onChange={handleChange} />
               {errors.zipCode && <p className="text-sm text-red-500 pt-1">{errors.zipCode}</p>}
             </div>
