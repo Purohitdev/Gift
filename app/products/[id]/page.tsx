@@ -101,9 +101,8 @@ export default function ProductDetailPage() {
           <ProductGallery product={product} />
           <ProductInfo product={product} />
         </div>
-
-        <ProductHighlights highlights={product.highlights} />
         <ProductDescription description={product.description} />
+        <ProductHighlights highlights={product.highlights} />
         {/* <SampleWorks /> */}
               <RelatedProducts currentProductId={productId} />
 

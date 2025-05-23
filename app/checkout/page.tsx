@@ -121,7 +121,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen py-8 md:py-12">
+    <main className="min-h-screen py-8 md:py-12 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4">
         <h1 className="text-2xl md:text-3xl font-serif font-bold mb-8 text-center">
           Checkout

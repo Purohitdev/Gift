@@ -15,7 +15,7 @@ export default function CartPage() {
   const tax = subtotal * 0.08
 
   return (
-    <main className="min-h-screen py-8 md:py-12">
+    <main className="min-h-screen py-8 md:py-12 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8] ">
       <div className="container px-4">
         <h1 className="text-2xl md:text-3xl font-serif font-bold mb-8 text-center">Shopping Cart</h1>
 
@@ -33,7 +33,7 @@ export default function CartPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg shadow-pastel overflow-hidden">
+              <div className="bg-white/80 rounded-lg shadow-pastel overflow-hidden">
                 <div className="p-6">
                   <h2 className="text-lg font-medium mb-4">Cart Items ({items.length})</h2>
 
@@ -125,7 +125,7 @@ export default function CartPage() {
             </div>
 
             <div>
-              <div className="bg-white rounded-lg shadow-pastel overflow-hidden sticky top-24">
+              <div className="bg-white/80 rounded-lg shadow-pastel overflow-hidden sticky top-24">
                 <div className="p-6">
                   <h2 className="text-lg font-medium mb-4">Order Summary</h2>
 

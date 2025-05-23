@@ -145,7 +145,7 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
   const statusInfo = getOrderStatusInfo()
 
   return (
-    <main className="min-h-screen py-8 md:py-12">
+    <main className="min-h-screen py-8 md:py-12 bg-gradient-to-b from-[#ffe9e3a8] via-[#faedcda8] to-[#fde2e2a8]">
       <div className="container px-4">
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={() => router.back()} className="mr-4">
